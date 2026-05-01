@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+
+# Build folders
+dist/
+build/
+
+# Sequelize
+src/database.sqlite
+src/database.sqlite-journal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
+
+# PM2
+.pm2/
+
+# Uploads
+uploads/
+
+# Cache
+.cache/
+
+# Optional npm cache
+.npm
+
+# Optional eslint cache
+.eslintcache
