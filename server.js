@@ -6,8 +6,13 @@ const cors = require("cors");
 const compression = require("compression");
 const morgan = require("morgan");
 const hpp = require("hpp");
+const manufacturerRoutes = require("./src/routes/Manufacturer/index");
+const distributorRoutes = require("./src/routes/Distributor/index");
+const operatorRoutes = require("./src/routes/Operator/index");
+const swaggerUi = require('swagger-ui-express');
 
 const db = require("./src/models");
+const { manufacturerSwaggerSpec, distributorSwaggerSpec, operatorSwaggerSpec } = require("./src/helpers/swagger");
 
 const app = express();
 
@@ -44,6 +49,10 @@ if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
 
+// Swagger route
+app.use("/api-docs/manufacturer", swaggerUi.serveFiles(manufacturerSwaggerSpec), swaggerUi.setup(manufacturerSwaggerSpec));
+app.use("/api-docs/distributor", swaggerUi.serveFiles(distributorSwaggerSpec), swaggerUi.setup(distributorSwaggerSpec));
+app.use("/api-docs/operator", swaggerUi.serveFiles(operatorSwaggerSpec), swaggerUi.setup(operatorSwaggerSpec));
 
 // Health Route
 app.get("/", (req, res) => {
@@ -54,8 +63,9 @@ app.get("/", (req, res) => {
 
 
 // API Routes
-// app.use("/v1/auth", require("./src/routes/authRoutes"));
-
+app.use("/v1/manufacturer", manufacturerRoutes);
+app.use("/v1/distributor", distributorRoutes);
+app.use("/v1/operator", operatorRoutes);
 
 
 // Global Error Handler

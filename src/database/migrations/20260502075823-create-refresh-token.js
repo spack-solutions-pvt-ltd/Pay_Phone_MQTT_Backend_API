@@ -2,24 +2,24 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Wallets', {
+    await queryInterface.createTable('RefreshTokens', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.BIGINT
       },
+      token: {
+        type: Sequelize.STRING
+      },
       userId: {
         type: Sequelize.BIGINT
       },
-      operatorId: {
-        type: Sequelize.BIGINT
+      expire: {
+        type: Sequelize.DATE
       },
-      balance: {
-        type: Sequelize.DECIMAL
-      },
-      accountType: {
-        type: Sequelize.ENUM("Distributor", "Operator", "User")
+      type: {
+        type: Sequelize.ENUM("Manufacturer", "Distributor", "Operator", "User")
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +32,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Wallets');
+    await queryInterface.dropTable('RefreshTokens');
   }
 };
