@@ -31,7 +31,13 @@ module.exports = {
         type: Sequelize.ENUM("Credit", "Debit")
       },
       transactionType: {
-        type: Sequelize.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND")
+        type: Sequelize.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND","DEDUCT_FUNDS")
+      },
+      distributorId:{
+        type: Sequelize.BIGINT
+      },
+      remainingBalance: {
+        type: Sequelize.DECIMAL
       },
       createdAt: {
         allowNull: false,

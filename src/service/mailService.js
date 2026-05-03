@@ -596,9 +596,269 @@ const sendDistributorCredentialsEmail = async ({ email, dummyPassword, name }) =
         console.error("Error sending distributor credentials email:", error);
     }
 };
+const sendOperatorCredentialsEmail = async ({ email, password, name }) => {
+
+    const loginUrl = "https://operator.ss.com";
+
+    const mailOptions = {
+        from: `"SS Support Team" <${process.env.MAIL_USER}>`,
+        to: email,
+        subject: "Welcome to SS Operator Portal - Your Login Credentials",
+        html: `
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8" />
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Operator Account Credentials</title>
+        </head>
+
+        <body style="
+            margin:0;
+            padding:0;
+            background-color:#f3f4f6;
+            font-family:Arial, Helvetica, sans-serif;
+        ">
+
+            <table width="100%" cellpadding="0" cellspacing="0" 
+                style="background-color:#f3f4f6; padding:40px 0;">
+
+                <tr>
+                    <td align="center">
+
+                        <table width="620" cellpadding="0" cellspacing="0"
+                            style="
+                                background:#ffffff;
+                                border-radius:12px;
+                                overflow:hidden;
+                                box-shadow:0 4px 12px rgba(0,0,0,0.08);
+                            ">
+
+                            <!-- Header -->
+                            <tr>
+                                <td align="center"
+                                    style="
+                                        background:linear-gradient(90deg,#0f172a,#1e293b);
+                                        padding:35px 20px;
+                                    ">
+
+                                    <h1 style="
+                                        margin:0;
+                                        color:#ffffff;
+                                        font-size:30px;
+                                        font-weight:bold;
+                                    ">
+                                        SS Operator Portal
+                                    </h1>
+
+                                    <p style="
+                                        margin:10px 0 0;
+                                        color:#cbd5e1;
+                                        font-size:15px;
+                                    ">
+                                        Your operator account has been created successfully.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                            <!-- Body -->
+                            <tr>
+                                <td style="padding:40px 35px;">
+
+                                    <h2 style="
+                                        margin-top:0;
+                                        color:#111827;
+                                        font-size:24px;
+                                    ">
+                                        Hello ${name},
+                                    </h2>
+
+                                    <p style="
+                                        font-size:16px;
+                                        line-height:1.7;
+                                        color:#4b5563;
+                                        margin-bottom:25px;
+                                    ">
+                                        Welcome to the SS Operator Portal.
+                                        Your account is now active and ready to use.
+                                        Please find your login credentials below.
+                                    </p>
+
+                                    <!-- Credentials Box -->
+                                    <table width="100%" cellpadding="0" cellspacing="0"
+                                        style="
+                                            background:#f9fafb;
+                                            border:1px solid #e5e7eb;
+                                            border-radius:10px;
+                                            padding:20px;
+                                        ">
+
+                                        <tr>
+                                            <td style="padding-bottom:18px;">
+
+                                                <span style="
+                                                    font-size:13px;
+                                                    color:#6b7280;
+                                                    font-weight:bold;
+                                                ">
+                                                    LOGIN URL
+                                                </span>
+
+                                                <p style="
+                                                    margin:6px 0 0;
+                                                    font-size:16px;
+                                                    color:#2563eb;
+                                                    word-break:break-all;
+                                                ">
+                                                    ${loginUrl}
+                                                </p>
+
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td style="padding-bottom:18px;">
+
+                                                <span style="
+                                                    font-size:13px;
+                                                    color:#6b7280;
+                                                    font-weight:bold;
+                                                ">
+                                                    EMAIL ADDRESS
+                                                </span>
+
+                                                <p style="
+                                                    margin:6px 0 0;
+                                                    font-size:16px;
+                                                    color:#111827;
+                                                ">
+                                                    ${email}
+                                                </p>
+
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+
+                                                <span style="
+                                                    font-size:13px;
+                                                    color:#6b7280;
+                                                    font-weight:bold;
+                                                ">
+                                                    TEMPORARY PASSWORD
+                                                </span>
+
+                                                <p style="
+                                                    margin:6px 0 0;
+                                                    font-size:16px;
+                                                    color:#111827;
+                                                    font-weight:bold;
+                                                    letter-spacing:1px;
+                                                ">
+                                                    ${password}
+                                                </p>
+
+                                            </td>
+                                        </tr>
+
+                                    </table>
+
+                                    <!-- Login Button -->
+                                    <table width="100%" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td align="center" style="padding:35px 0 15px;">
+
+                                                <a href="${loginUrl}"
+                                                    target="_blank"
+                                                    style="
+                                                        display:inline-block;
+                                                        background:#2563eb;
+                                                        color:#ffffff;
+                                                        text-decoration:none;
+                                                        padding:14px 32px;
+                                                        border-radius:8px;
+                                                        font-size:16px;
+                                                        font-weight:bold;
+                                                    ">
+                                                    Login to Operator Portal
+                                                </a>
+
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Security Note -->
+                                    <p style="
+                                        margin-top:25px;
+                                        font-size:14px;
+                                        line-height:1.7;
+                                        color:#6b7280;
+                                    ">
+                                        For security purposes, we recommend changing your password
+                                        immediately after logging in.
+                                    </p>
+
+                                    <p style="
+                                        font-size:14px;
+                                        line-height:1.7;
+                                        color:#6b7280;
+                                    ">
+                                        If you did not expect this account creation email,
+                                        please contact the support team immediately.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td align="center"
+                                    style="
+                                        background:#f9fafb;
+                                        border-top:1px solid #e5e7eb;
+                                        padding:25px 20px;
+                                    ">
+
+                                    <p style="
+                                        margin:0;
+                                        font-size:13px;
+                                        color:#9ca3af;
+                                    ">
+                                        © ${new Date().getFullYear()} SS Operator Portal.
+                                        All rights reserved.
+                                    </p>
+
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </td>
+                </tr>
+
+            </table>
+
+        </body>
+        </html>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log("Operator credentials email sent successfully");
+    } catch (error) {
+        console.error("Error sending operator credentials email:", error);
+    }
+};
+
 module.exports = {
     transporter,
     sendManufacturerForgotPasswordEmail,
     sendDistributorForgotPasswordEmail,
-    sendOperatorForgotPasswordEmail
+    sendOperatorForgotPasswordEmail,
+    sendOperatorCredentialsEmail,
 };

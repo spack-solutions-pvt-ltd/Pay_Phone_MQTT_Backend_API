@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "walletId",
         as: "wallet"
       })
+      this.belongsTo(models.Distributor, {
+        foreignKey: "distributorId",
+        as: "distributor"
+      })
     }
   }
   WalletTransaction.init({
@@ -34,11 +38,13 @@ module.exports = (sequelize, DataTypes) => {
     amount: DataTypes.DECIMAL,
     paymentMode: DataTypes.STRING,
     transactionType: {
-      type: DataTypes.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND")
+      type: DataTypes.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND", "DEDUCT_FUNDS")
     },
     type: {
       type: DataTypes.ENUM("Credit", "Debit")
-    }
+    },
+    distributorId: DataTypes.BIGINT,
+    remainingBalance: DataTypes.DECIMAL
   }, {
     sequelize,
     modelName: 'WalletTransaction',
