@@ -1,6 +1,5 @@
-// validation/operator/operatorValidation.js
 
-const { body } = require("express-validator");
+const { body ,param} = require("express-validator");
 const { validationMiddleware } = require("../../middleware/validationMiddleware");
 
 const createOperatorValidation = [

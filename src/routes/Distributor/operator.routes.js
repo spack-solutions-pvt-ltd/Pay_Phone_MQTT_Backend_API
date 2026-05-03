@@ -215,19 +215,12 @@ router.get("/dashboard-cards/:operatorId", getOperatorDashboardCards);
 
 /**
  * @swagger
- * /v1/distributor/operator/wallet-recharge}:
+ * /v1/distributor/operator/wallet-recharge:
  *   post:
  *     summary: Recharge operator wallet
  *     tags: [Distributor Operator]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: operatorId
- *         required: true
- *         schema:
- *           type: integer
- *         example: 1
  *     requestBody:
  *       required: true
  *       content:
@@ -235,12 +228,13 @@ router.get("/dashboard-cards/:operatorId", getOperatorDashboardCards);
  *           schema:
  *             type: object
  *             required:
+ *               - operatorId
  *               - amount
  *               - type
  *             properties:
- *              operatorId:
- *                type: integer
- *                example: 1
+ *               operatorId:
+ *                 type: integer
+ *                 example: 1
  *               amount:
  *                 type: number
  *                 example: 5000
