@@ -1,30 +1,29 @@
 
 const express = require("express");
+const { createTerminalValidation, updateTerminalValidation } = require("../../validation/manufacturer/terminalValidation");
+const { createTerminal, getAllTerminals, getTerminalById, updateTerminal } = require("../../controller/Manufacturer/terminal.controller");
 
-const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, } = require("../../controller/Manufacturer/distributor.controller");
-const { createDistributorValidation, updateDistributorValidation } = require("../../validation/manufacturer/distributorValidation");
 const router = express.Router();
 
 
-router.get("/", getAllDistributors);
-router.get("/:id", getDistributorById);
-router.post("/", createDistributorValidation, createDistributor);
-router.put("/:id", updateDistributorValidation, updateDistributor);
-
+router.get("/", getAllTerminals);
+router.get("/:id", getTerminalById);
+router.post("/", createTerminalValidation, createTerminal);
+router.put("/:id", updateTerminalValidation, updateTerminal);
 
 /**
  * @swagger
  * tags:
- *   name: Manufacturer Distributor
- *   description: Manufacturer distributor management APIs
+ *   name: Manufacturer Terminal
+ *   description: Manufacturer terminal management APIs
  */
 
 /**
  * @swagger
- * /v1/manufacturer/distributor:
+ * /v1/manufacturer/terminal:
  *   get:
- *     summary: Get all distributors
- *     tags: [Manufacturer Distributor]
+ *     summary: Get all terminals
+ *     tags: [Manufacturer Terminal]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -42,16 +41,26 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *         name: search
  *         schema:
  *           type: string
- *         example: distributor
+ *         example: TRM1001
+ *       - in: query
+ *         name: distributorId
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *       - in: query
+ *         name: operatorId
+ *         schema:
+ *           type: integer
+ *         example: 1
  *       - in: query
  *         name: status
  *         schema:
  *           type: string
- *           enum: [Active, Blocked]
+ *           enum: [Active, Inactive, Disconnected, Faulted]
  *         example: Active
  *     responses:
  *       200:
- *         description: Distributor list fetched successfully
+ *         description: Terminal list fetched successfully
  *         content:
  *           application/json:
  *             schema:
@@ -62,7 +71,7 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Distributor list
+ *                   example: Terminal list
  *                 data:
  *                   type: array
  *                   items:
@@ -82,14 +91,16 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                     limit:
  *                       type: integer
  *                       example: 10
+ *       401:
+ *         description: Unauthorized
  */
 
 /**
  * @swagger
- * /v1/manufacturer/distributor/{id}:
+ * /v1/manufacturer/terminal/{id}:
  *   get:
- *     summary: Get distributor by ID
- *     tags: [Manufacturer Distributor]
+ *     summary: Get terminal by ID
+ *     tags: [Manufacturer Terminal]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -101,7 +112,7 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *         example: 1
  *     responses:
  *       200:
- *         description: Distributor details fetched successfully
+ *         description: Terminal details fetched successfully
  *         content:
  *           application/json:
  *             schema:
@@ -112,19 +123,19 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Distributor details
+ *                   example: Terminal details
  *                 data:
  *                   type: object
  *       404:
- *         description: Distributor not found
+ *         description: Terminal not found
  */
 
 /**
  * @swagger
- * /v1/manufacturer/distributor:
+ * /v1/manufacturer/terminal:
  *   post:
- *     summary: Create distributor
- *     tags: [Manufacturer Distributor]
+ *     summary: Create terminal
+ *     tags: [Manufacturer Terminal]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -134,34 +145,34 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - email
- *               - phone
- *               - companyName
- *               - gstNumber
+ *               - serialNo
+ *               - distributorId
+ *               - operatorId
+ *               - campus
  *               - location
+ *               - firmwareVersion
  *             properties:
- *               name:
+ *               serialNo:
  *                 type: string
- *                 example: John Distributor
- *               email:
+ *                 example: SN123456789
+ *               distributorId:
+ *                 type: integer
+ *                 example: 1
+ *               operatorId:
+ *                 type: integer
+ *                 example: 1
+ *               campus:
  *                 type: string
- *                 example: distributor@gmail.com
- *               phone:
- *                 type: string
- *                 example: 9876543210
- *               companyName:
- *                 type: string
- *                 example: ABC Distributors Pvt Ltd
- *               gstNumber:
- *                 type: string
- *                 example: 22AAAAA0000A1Z5
+ *                 example: Main Campus
  *               location:
  *                 type: string
  *                 example: Hyderabad
+ *               firmwareVersion:
+ *                 type: string
+ *                 example: v1.0.0
  *     responses:
  *       201:
- *         description: Distributor created successfully
+ *         description: Terminal created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -172,19 +183,19 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Distributor created successfully
+ *                   example: Terminal created successfully
  *                 data:
  *                   type: object
  *       400:
- *         description: Distributor already exists
+ *         description: Serial number already exists
  */
 
 /**
  * @swagger
- * /v1/manufacturer/distributor/{id}:
+ * /v1/manufacturer/terminal/{id}:
  *   put:
- *     summary: Update distributor
- *     tags: [Manufacturer Distributor]
+ *     summary: Update terminal
+ *     tags: [Manufacturer Terminal]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -201,31 +212,31 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               serialNo:
  *                 type: string
- *                 example: Updated Distributor
- *               email:
+ *                 example: SN123456789
+ *               distributorId:
+ *                 type: integer
+ *                 example: 1
+ *               operatorId:
+ *                 type: integer
+ *                 example: 1
+ *               campus:
  *                 type: string
- *                 example: updated@gmail.com
- *               phone:
- *                 type: string
- *                 example: 9876543210
- *               companyName:
- *                 type: string
- *                 example: Updated Company Pvt Ltd
- *               gstNumber:
- *                 type: string
- *                 example: 22AAAAA0000A1Z5
+ *                 example: Main Campus
  *               location:
  *                 type: string
  *                 example: Chennai
+ *               firmwareVersion:
+ *                 type: string
+ *                 example: v1.0.1
  *               status:
  *                 type: string
- *                 enum: [Active, Blocked]
+ *                 enum: [Active, Inactive, Disconnected, Faulted]
  *                 example: Active
  *     responses:
  *       200:
- *         description: Distributor updated successfully
+ *         description: Terminal updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -236,11 +247,11 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                   example: true
  *                 message:
  *                   type: string
- *                   example: Distributor updated successfully
+ *                   example: Terminal updated successfully
  *                 data:
  *                   type: object
  *       404:
- *         description: Distributor not found
+ *         description: Terminal not found
  */
 
 /**
