@@ -10,7 +10,7 @@ const manufacturerRoutes = require("./src/routes/Manufacturer/index");
 const distributorRoutes = require("./src/routes/Distributor/index");
 const operatorRoutes = require("./src/routes/Operator/index");
 const swaggerUi = require('swagger-ui-express');
-
+require('./src/MQTT/mqttHandle')
 const db = require("./src/models");
 const { manufacturerSwaggerSpec, distributorSwaggerSpec, operatorSwaggerSpec } = require("./src/helpers/swagger");
 
