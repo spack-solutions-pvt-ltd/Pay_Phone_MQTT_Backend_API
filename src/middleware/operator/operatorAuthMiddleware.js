@@ -28,8 +28,17 @@ const operatorAuthMiddleware = async (req, res, next) => {
                 message: "Unauthorized access",
             });
         }
+        const operator = await Operator.findByPk(decoded.id, {
+            attributes: ['id', 'email', 'name']
+        });
+        if (!operator) {
+            return res.status(404).json({
+                success: false,
+                message: "Operator not found",
+            });
+        }
 
-        req.operator = decoded;
+        req.operator = operator;
 
         next();
 

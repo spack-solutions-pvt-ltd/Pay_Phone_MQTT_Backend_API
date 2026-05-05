@@ -1,5 +1,4 @@
-// middlewares/manufacturerAuthMiddleware.js
-
+const { Manufacturer } = require("../../models")
 const jwt = require("jsonwebtoken");
 
 const manufacturerAuthMiddleware = async (req, res, next) => {
@@ -25,7 +24,18 @@ const manufacturerAuthMiddleware = async (req, res, next) => {
             });
         }
 
-        req.manufacturer = decoded;
+        const manufacturer = await Manufacturer.findByPk(decoded.id, {
+            attributes: ['id', 'email', 'name']
+        });
+
+        if (!manufacturer) {
+            return res.status(404).json({
+                success: false,
+                message: "Manufacturer not found",
+            });
+        }
+
+        req.manufacturer = manufacturer;
 
         next();
 

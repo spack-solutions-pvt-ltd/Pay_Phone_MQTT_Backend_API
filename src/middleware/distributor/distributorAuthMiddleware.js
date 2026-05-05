@@ -1,3 +1,4 @@
+const { Distributor } = require("../../models")
 const jwt = require("jsonwebtoken");
 
 const distributorAuthMiddleware = async (req, res, next) => {
@@ -26,8 +27,20 @@ const distributorAuthMiddleware = async (req, res, next) => {
                 message: "Unauthorized access",
             });
         }
+        const distributor = await Distributor.findByPk(decoded.id, {
+            attributes: ['id', 'email', 'name']
+            // {
+            //     exclude: ["password"]
+            // },
+        });
+        if (!distributor) {
+            return res.status(404).json({
+                success: false,
+                message: "Distributor not found",
+            });
+        }
 
-        req.distributor = decoded;
+        req.distributor = distributor;
 
         next();
 
