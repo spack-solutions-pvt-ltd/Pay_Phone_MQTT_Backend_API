@@ -12,7 +12,7 @@ module.exports = {
     await queryInterface.bulkInsert('Manufacturers', [
       {
         name: "Admin Manufacturer",
-        email: "manufacturer@gmail.com",
+        email: "mahendar@spackdigi.com",
         password: hashedPassword,
         phone: "9876543210",
         status: "Active",

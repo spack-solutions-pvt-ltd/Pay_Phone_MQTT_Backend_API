@@ -22,7 +22,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth/login:
+ * /auth/login:
  *   post:
  *     summary: Manufacturer login
  *     tags: [Manufacturer Auth]
@@ -73,7 +73,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth/refresh-token:
+ * /auth/refresh-token:
  *   post:
  *     summary: Refresh access token
  *     tags: [Manufacturer Auth]
@@ -98,7 +98,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth:
+ * /auth:
  *   get:
  *     summary: Get manufacturer details by token
  *     tags: [Manufacturer Auth]
@@ -126,7 +126,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth/logout:
+ * /auth/logout:
  *   post:
  *     summary: Manufacturer logout
  *     tags: [Manufacturer Auth]
@@ -152,7 +152,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth/forgot-password:
+ * /auth/forgot-password:
  *   post:
  *     summary: Send forgot password mail
  *     tags: [Manufacturer Auth]
@@ -177,7 +177,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/manufacturer/auth/reset-password/{token}:
+ * /auth/reset-password/{token}:
  *   post:
  *     summary: Reset manufacturer password
  *     tags: [Manufacturer Auth]

@@ -26,13 +26,23 @@ app.use(helmet());
 app.use(hpp());
 
 
+const corsList = [
+    'http://localhost:5001',
+    'http://localhost:5000',
+    'http://localhost:5173'
+];
+
 // Enable CORS
-app.use(
-    cors({
-        origin: process.env.CLIENT_URL || "*",
-        credentials: true,
-    })
-);
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || corsList.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 
 // Compress response
 app.use(compression());
