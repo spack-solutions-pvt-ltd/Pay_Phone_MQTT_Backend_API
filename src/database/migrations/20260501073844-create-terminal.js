@@ -12,6 +12,12 @@ module.exports = {
       terminalId: {
         type: Sequelize.STRING
       },
+      simNo: {
+        type: Sequelize.STRING
+      },
+      imei: {
+        type: Sequelize.STRING
+      },
       serialNo: {
         type: Sequelize.STRING
       },

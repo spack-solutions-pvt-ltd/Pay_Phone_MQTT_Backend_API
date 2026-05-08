@@ -36,6 +36,8 @@ module.exports = (sequelize, DataTypes) => {
   }
   Terminal.init({
     terminalId: DataTypes.STRING,
+    simNo: DataTypes.STRING,
+    imeiNo: DataTypes.STRING,
     serialNo: DataTypes.STRING,
     distributorId: DataTypes.BIGINT,
     operatorId: DataTypes.BIGINT,
