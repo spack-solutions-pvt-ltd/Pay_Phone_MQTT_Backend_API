@@ -26,15 +26,15 @@ module.exports = (sequelize, DataTypes) => {
         as: "activeDays"
       })
 
+      this.hasMany(models.RFIDCard, {
+        foreignKey: "userId",
+        as: "rfidCards"
+      })
+
       this.hasOne(models.Wallet, {
         foreignKey: "userId",
         as: "wallet"
       })
-
-      // this.hasMany(models.WalletTransaction, {
-      //   foreignKey: "userId",
-      //   as: "transactions"
-      // })
 
       this.hasMany(models.CallLog, {
         foreignKey: "userId",
@@ -47,7 +47,6 @@ module.exports = (sequelize, DataTypes) => {
     operatorId: DataTypes.BIGINT,
     fullName: DataTypes.STRING,
     phone: DataTypes.STRING,
-    cardNumber: DataTypes.STRING,
     callDurationLimit: DataTypes.INTEGER,
     activeFrom: DataTypes.STRING,
     activeTo: DataTypes.STRING,

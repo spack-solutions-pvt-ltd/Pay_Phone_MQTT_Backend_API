@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('RFIDCards', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -10,29 +10,13 @@ module.exports = {
         type: Sequelize.BIGINT
       },
       userId: {
-        type: Sequelize.STRING
-      },
-      operatorId: {
         type: Sequelize.BIGINT
       },
-      fullName: {
-        type: Sequelize.STRING
-      },
-      phone: {
-        type: Sequelize.STRING
-      },
-      callDurationLimit: {
-        type: Sequelize.INTEGER
-      },
-      activeFrom: {
-        type: Sequelize.STRING
-      },
-      activeTo: {
+      cardNumber: {
         type: Sequelize.STRING
       },
       status: {
-        type: Sequelize.ENUM("Active", "Inactive", "Blocked"),
-        defaultValue: "Active"
+        type: Sequelize.ENUM("Active", "Inactive", "Blocked", "Missing", "Lost", "Damaged", "Destroyed"),
       },
       createdAt: {
         allowNull: false,
@@ -45,6 +29,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users');
+    await queryInterface.dropTable('RFIDCards');
   }
 };

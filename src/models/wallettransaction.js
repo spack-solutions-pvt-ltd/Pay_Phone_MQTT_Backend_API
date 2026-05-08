@@ -11,15 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      // this.belongsTo(models.User, {
-      //   foreignKey: "userId",
-      //   as: "user"
-      // })
-
-      // this.belongsTo(models.Operator, {
-      //   foreignKey: "operatorId",
-      //   as: "operator"
-      // })
       this.belongsTo(models.Wallet, {
         foreignKey: "walletId",
         as: "wallet"
@@ -28,13 +19,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "distributorId",
         as: "distributor"
       })
+      this.belongsTo(models.Operator, {
+        foreignKey: "operatorId",
+        as: "operator"
+      })
     }
   }
   WalletTransaction.init({
     walletId: DataTypes.BIGINT,
     transactionId: DataTypes.STRING,
-    userId: DataTypes.BIGINT,
-    operatorId: DataTypes.BIGINT,
     amount: DataTypes.DECIMAL,
     paymentMode: DataTypes.STRING,
     transactionType: {
@@ -43,8 +36,9 @@ module.exports = (sequelize, DataTypes) => {
     type: {
       type: DataTypes.ENUM("Credit", "Debit")
     },
+    remainingBalance: DataTypes.DECIMAL,
     distributorId: DataTypes.BIGINT,
-    remainingBalance: DataTypes.DECIMAL
+    operatorId: DataTypes.BIGINT,
   }, {
     sequelize,
     modelName: 'WalletTransaction',

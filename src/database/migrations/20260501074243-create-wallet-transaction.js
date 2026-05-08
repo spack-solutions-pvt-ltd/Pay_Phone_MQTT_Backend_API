@@ -15,9 +15,6 @@ module.exports = {
       transactionId: {
         type: Sequelize.STRING
       },
-      userId: {
-        type: Sequelize.BIGINT
-      },
       operatorId: {
         type: Sequelize.BIGINT
       },
