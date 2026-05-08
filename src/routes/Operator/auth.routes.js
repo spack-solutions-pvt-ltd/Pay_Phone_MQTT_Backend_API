@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/login", operatorLoginValidation, operatorLogin);
 router.post("/refresh-token", operatorRefreshTokenHandler);
-router.get("/", operatorAuthMiddleware, getOperatorByToken);
+router.get("/token", operatorAuthMiddleware, getOperatorByToken);
 router.post("/logout", operatorLogout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
@@ -100,7 +100,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/operator/auth:
+ * /v1/operator/auth/token:
  *   get:
  *     summary: Get operator details by token
  *     tags: [Operator Auth]

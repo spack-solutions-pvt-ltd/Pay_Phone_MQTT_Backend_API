@@ -861,4 +861,5 @@ module.exports = {
     sendDistributorForgotPasswordEmail,
     sendOperatorForgotPasswordEmail,
     sendOperatorCredentialsEmail,
+    sendDistributorCredentialsEmail,
 };

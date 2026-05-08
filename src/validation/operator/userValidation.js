@@ -9,8 +9,6 @@ const createUserValidation = [
 
     body("phone").notEmpty().withMessage("Phone number is required"),
 
-    body("cardNumber").notEmpty().withMessage("Card number is required"),
-
     body("callDurationLimit").notEmpty().withMessage("Call duration limit is required")
         .isNumeric().withMessage("Call duration limit must be number"),
 

@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM("Active", "Inactive", "Blocked", "Missing", "Lost", "Damaged", "Destroyed"),
       defaultValue: "Active",
     },
+    operatorId: DataTypes.BIGINT,
   }, {
     sequelize,
     modelName: 'RFIDCard',

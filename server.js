@@ -29,7 +29,8 @@ app.use(hpp());
 const corsList = [
     'http://localhost:5001',
     'http://localhost:5000',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'http://localhost:5174'
 ];
 
 // Enable CORS

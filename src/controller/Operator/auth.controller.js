@@ -70,12 +70,10 @@ const getOperatorByToken = async (req, res, next) => {
 
     try {
 
-        const operator = await Operator.findByPk(
-            req.operator.id,
+        const operator = await Operator.findByPk(req.operator.id,
             {
-                attributes: {
-                    exclude: ["password"],
-                },
+                attributes: { exclude: ["password"], },
+                include: { model: Wallet, as: "wallet" },
             }
         );
 

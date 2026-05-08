@@ -1,5 +1,4 @@
-// middleware/operator/operatorAuthMiddleware.js
-
+const { Operator } = require("../../models")
 const jwt = require("jsonwebtoken");
 
 const operatorAuthMiddleware = async (req, res, next) => {
@@ -17,10 +16,7 @@ const operatorAuthMiddleware = async (req, res, next) => {
 
         const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(
-            token,
-            process.env.JWT_SECRET_KEY
-        );
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
         if (decoded.type !== "Operator") {
             return res.status(401).json({
@@ -43,7 +39,7 @@ const operatorAuthMiddleware = async (req, res, next) => {
         next();
 
     } catch (error) {
-
+        console.log(error)
         return res.status(401).json({
             success: false,
             message: "Invalid or expired token",

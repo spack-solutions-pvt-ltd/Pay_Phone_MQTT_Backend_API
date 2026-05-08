@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
     amount: DataTypes.DECIMAL,
     paymentMode: DataTypes.STRING,
     transactionType: {
-      type: DataTypes.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND", "DEDUCT_FUNDS")
+      type: DataTypes.ENUM("ADD_FUNDS", "CALL_DEDUCTION", "REFUND", "DEDUCT_FUNDS", "TRANSFER_TO_USER", "RECEIVED_FROM_USER",)
     },
     type: {
       type: DataTypes.ENUM("Credit", "Debit")

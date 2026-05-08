@@ -1,5 +1,6 @@
 const { RefreshToken } = require("../models");
 const { v4: uuidv4 } = require("uuid");
+const { generateAccessToken } = require("./jwtHelper");
 
 const createRefreshToken = async (user, type, expiryTime = Date.now() + 1000 * 60 * 60 * 24 * 1) => {
 
@@ -130,7 +131,6 @@ const operatorRefreshTokenHandler = async (req, res, next) => {
         console.error("Error refreshing access token:", error);
         next(error);
     }
-
 
 }
 

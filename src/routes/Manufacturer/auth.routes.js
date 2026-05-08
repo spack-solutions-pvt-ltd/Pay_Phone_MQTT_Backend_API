@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/login", manufacturerLoginValidation, manufacturerLogin);
 router.post("/refresh-token", manufacturerRefreshTokenHandler);
-router.get("/", manufacturerAuthMiddleware, getManufacturerByToken);
+router.get("/token", manufacturerAuthMiddleware, getManufacturerByToken);
 router.post("/logout", manufacturerLogout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
@@ -98,7 +98,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /auth:
+ * /auth/token:
  *   get:
  *     summary: Get manufacturer details by token
  *     tags: [Manufacturer Auth]

@@ -11,7 +11,7 @@ const { distributorAuthMiddleware, } = require("../../middleware/distributor/dis
 router.post("/login", distributorLoginValidation, distributorLogin);
 
 router.post("/refresh-token", distributorRefreshTokenHandler);
-router.get("/", distributorAuthMiddleware, getDistributorByToken);
+router.get("/token", distributorAuthMiddleware, getDistributorByToken);
 router.post("/logout", distributorLogout);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
@@ -101,7 +101,7 @@ router.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /v1/distributor/auth:
+ * /v1/distributor/auth/token:
  *   get:
  *     summary: Get distributor details by token
  *     tags: [Distributor Auth]

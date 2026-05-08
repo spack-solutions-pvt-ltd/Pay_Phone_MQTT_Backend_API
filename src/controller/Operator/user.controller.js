@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard } = require("../../models");
+const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog } = require("../../models");
 
 
 
@@ -90,10 +90,7 @@ const createUser = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
         const {
-            fullName, phone, callDurationLimit, activeFrom, activeTo,
-            associatedNumbers,
-            activeDays,
-            rfidCard,
+            fullName, phone, callDurationLimit, activeFrom, activeTo, associatedNumbers, activeDays,
         } = req.body;
 
         const existingUser = await User.findOne({
@@ -123,12 +120,6 @@ const createUser = async (req, res, next) => {
             activeFrom,
             activeTo,
         }, { transaction, });
-
-        // if(rfidCard){
-        //     await RFIDCard.create({
-        //         userId:user.id,
-        //     })
-        // }
 
         // associated numbers
         if (associatedNumbers && associatedNumbers.length > 0) {
@@ -218,9 +209,121 @@ const updateUser = async (req, res, next) => {
     }
 };
 
+
+const getAllRfidCardsByUserId = async (req, res, next) => {
+    try {
+        const rfidCards = await RFIDCard.findAll({
+            where: {
+                userId: req.params.id
+            }
+        });
+        return res.status(200).json({
+            success: true,
+            message: "RFID cards",
+            data: rfidCards
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+const userWalletTransaction = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+
+        let { page = 1, limit = 10, search = "", type, } = req.query;
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const wallet = await Wallet.findOne({
+            where: {
+                userId: req.params.id,
+                accountType: "User"
+            }
+        });
+
+        let whereCondition = { walletId: wallet.id };
+        if (type) { whereCondition.type = type; }
+
+        if (search) {
+            whereCondition[Op.or] = [
+                { transactionId: { [Op.like]: `%${search}%`, }, },
+            ];
+        }
+
+
+        const { count, rows } = await WalletTransaction.findAndCountAll({
+            where: whereCondition,
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Wallet transactions for user",
+            data: rows,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+const userCallLogsList = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        let { page = 1, limit = 10, search = "", type, } = req.query;
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+        let whereCondition = { userId: userId };
+        if (type) { whereCondition.type = type; }
+
+        if (search) {
+            whereCondition[Op.or] = [
+                { callerId: { [Op.like]: `%${search}%`, }, },
+                { phoneNumber: { [Op.like]: `%${search}%`, }, },
+            ];
+        }
+
+        const { count, rows: callLogs } = await CallLog.findAndCountAll({
+            where: whereCondition,
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+        })
+        return res.status(200).json({
+            success: true,
+            message: "Call logs for user",
+            data: callLogs,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+
 module.exports = {
     createUser,
     getAllUsers,
     getUserById,
     updateUser,
+    getAllRfidCardsByUserId,
+    userWalletTransaction,
+    userCallLogsList
 };

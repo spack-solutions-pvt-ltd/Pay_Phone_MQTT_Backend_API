@@ -18,6 +18,9 @@ module.exports = {
       status: {
         type: Sequelize.ENUM("Active", "Inactive", "Blocked", "Missing", "Lost", "Damaged", "Destroyed"),
       },
+      operatorId: {
+        type: Sequelize.BIGINT
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

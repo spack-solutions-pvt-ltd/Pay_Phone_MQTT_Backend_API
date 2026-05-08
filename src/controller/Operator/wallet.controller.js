@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { sequelize, User, Wallet, WalletTransaction, } = require("../../models");
 
 const rechargeUserWallet = async (req, res, next) => {
@@ -56,6 +57,7 @@ const rechargeUserWallet = async (req, res, next) => {
                 operatorId,
             },
             transaction,
+            attributes: ["id"],
         });
 
         if (!user) {
@@ -198,6 +200,127 @@ const rechargeUserWallet = async (req, res, next) => {
     }
 };
 
+const walletTranactions = async (req, res, next) => {
+    try {
+        const operatorId = req.operator.id;
+        let { page = 1, limit = 10, search = "", type, } = req.query;
+
+        const operatorWallet = await Wallet.findOne({
+            where: {
+                operatorId,
+                accountType: "Operator",
+            },
+        });
+
+        if (!operatorWallet) {
+            return res.status(404).json({ success: false, message: "Operator wallet not found", });
+        }
+
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const whereCondition = { walletId: operatorWallet.id, };
+
+        // search
+        if (search) {
+            whereCondition[Op.or] = [
+                { transactionId: { [Op.like]: `%${search}%`, }, },
+                { '$user.userId$': { [Op.like]: `%${search}%` } },
+                { '$user.fullName$': { [Op.like]: `%${search}%` } },
+            ];
+        }
+
+        const { count, rows: walletTransactions } = await WalletTransaction.findAndCountAll({
+            where: whereCondition,
+            include: [
+                {
+                    model: User, as: "user", attributes: ["id", "userId", "fullName", "phone",],
+                },
+            ],
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Wallet transactions fetched successfully",
+            data: walletTransactions,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const rechargerdWalletTranactions = async (req, res, next) => {
+    try {
+        const operatorId = req.operator.id;
+        let { page = 1, limit = 10, search = "", type, } = req.query;
+
+        const operatorWallet = await Wallet.findOne({
+            where: {
+                operatorId,
+                accountType: "Operator",
+            },
+        });
+
+        if (!operatorWallet) {
+            return res.status(404).json({ success: false, message: "Operator wallet not found", });
+        }
+
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const whereCondition = {
+            walletId: operatorWallet.id,
+            distributorId: { [Op.ne]: null },
+        };
+
+        // search
+        if (search) {
+            whereCondition[Op.or] = [
+                { transactionId: { [Op.like]: `%${search}%`, }, },
+                { '$user.userId$': { [Op.like]: `%${search}%` } },
+                { '$user.fullName$': { [Op.like]: `%${search}%` } },
+            ];
+        }
+
+        const { count, rows: walletTransactions } = await WalletTransaction.findAndCountAll({
+            where: whereCondition,
+            include: [
+                { model: User, as: "user", attributes: ["id", "userId", "fullName", "phone",], },
+            ],
+            limit,
+            offset,
+            order: [["createdAt", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Wallet transactions fetched successfully",
+            data: walletTransactions,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     rechargeUserWallet,
+    walletTranactions,
+    rechargerdWalletTranactions
 };
