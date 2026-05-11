@@ -7,14 +7,14 @@ const endCallHandler = async (incomingMessage, client) => {
         const { data } = incomingMessage;
 
         if (!data) {
-            console.error("[HEARTBEAT] Missing data object");
+            console.error("Missing data object");
             return;
         }
 
         const { tid, cid, credits, min_left, number, time_stamp } = data;
 
         if (!tid) {
-            console.error("[HEARTBEAT] Missing terminal id");
+            console.error("Missing terminal id");
             return;
         }
 
@@ -24,7 +24,7 @@ const endCallHandler = async (incomingMessage, client) => {
         });
 
         if (!terminal) {
-            console.warn(`[HEARTBEAT] Terminal not found : ${tid}`);
+            console.warn(`Terminal not found : ${tid}`);
             return;
         }
 
@@ -33,7 +33,7 @@ const endCallHandler = async (incomingMessage, client) => {
         });
 
         if (!card) {
-            console.warn(`[HEARTBEAT] RFID Card not found : ${cid}`);
+            console.warn(`RFID Card not found : ${cid}`);
             return;
         }
 
@@ -48,7 +48,7 @@ const endCallHandler = async (incomingMessage, client) => {
         });
 
         if (!runnigCall) {
-            console.warn(`[HEARTBEAT] No running call for this card : ${cid}`);
+            console.warn(`No running call for this card : ${cid}`);
             return;
         }
 
@@ -71,18 +71,16 @@ const endCallHandler = async (incomingMessage, client) => {
             console.warn(`User wallet not found : ${user.id}`);
             return;
         }
-        const userUpdatedBalance = Number(userWallet.balance) - Number(credits);
+        const amount = Number(userWallet.balance) - Number(credits);
 
-        const amount = Number(credits);
-
-        await userWallet.update({ balance: userUpdatedBalance });
+        await userWallet.update({ balance: credits });
 
         await WalletTransaction.create({
             transactionId: `UCTX${Date.now()}`,
             walletId: userWallet.id,
             amount: amount,
             type: "Debit",
-            remainingBalance: userUpdatedBalance,
+            remainingBalance: credits,
             transactionType: "DEDUCT_FUNDS",
         });
 
@@ -90,6 +88,7 @@ const endCallHandler = async (incomingMessage, client) => {
         runnigCall.status = 1;
         runnigCall.min_left = min_left
         runnigCall.endTime = time_stamp
+        runnigCall.creditsUsed = amount
         await runnigCall.save();
 
         const response = {

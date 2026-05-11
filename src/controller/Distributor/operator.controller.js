@@ -11,7 +11,7 @@ const createOperator = async (req, res, next) => {
 
         const {
             name, email, phone,
-            companyName, gstNumber, location,
+            companyName, gstNumber, location, per_min_price
         } = req.body;
 
         const existingOperator =
@@ -44,6 +44,7 @@ const createOperator = async (req, res, next) => {
             companyName,
             gstNumber,
             location,
+            per_min_price
         });
 
         await Wallet.create({
@@ -420,7 +421,7 @@ const getOperatorWalletTransactions = async (req, res, next) => {
 const getOperatorDashboardCards = async (req, res, next) => {
     try {
 
-        const operatorId = req.operator.id;
+        const operatorId = req.params.operatorId;
 
         // wallet
         const wallet = await Wallet.findOne({

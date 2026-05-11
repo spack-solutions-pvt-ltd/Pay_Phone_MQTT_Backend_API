@@ -40,6 +40,9 @@ module.exports = {
         type: Sequelize.ENUM("Active", "Blocked"),
         defaultValue: "Active"
       },
+      per_min_price: {
+        type: Sequelize.DECIMAL
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

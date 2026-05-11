@@ -50,7 +50,8 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM("Active", "Blocked"),
       defaultValue: "Active"
-    }
+    },
+    per_min_price: DataTypes.DECIMAL,
   }, {
     sequelize,
     modelName: 'Operator',

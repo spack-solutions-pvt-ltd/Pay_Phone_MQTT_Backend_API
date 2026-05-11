@@ -6,7 +6,7 @@ const rfidHandler = async (incomingMessage, client) => {
         const { data } = incomingMessage
 
         if (!data) {
-            console.error("[RFID] Missing data object");
+            console.error("Missing data object");
             return;
         }
 
@@ -21,6 +21,10 @@ const rfidHandler = async (incomingMessage, client) => {
             console.warn(`Terminal not found : ${tid}`);
             return;
         }
+        const operator = await Operator.findOne({
+            where: { id: terminal.operatorId },
+            attributes: ["id", "per_min_price"]
+        })
 
         const card = await RFIDCard.findOne({
             where: { cardNumber: cid }
@@ -36,7 +40,7 @@ const rfidHandler = async (incomingMessage, client) => {
         });
 
         if (!user) {
-            console.warn(`[RFID] User not found : ${card.userId}`);
+            console.warn(`User not found : ${card.userId}`);
             return;
         }
 
@@ -46,7 +50,7 @@ const rfidHandler = async (incomingMessage, client) => {
         }
 
         if (user.operatorId != terminal.operatorId) {
-            console.warn(`[RFID] User operator mismatch : ${card.userId}`);
+            console.warn(`User operator mismatch : ${card.userId}`);
             return;
         }
 
@@ -65,7 +69,7 @@ const rfidHandler = async (incomingMessage, client) => {
         });
 
         if (!associatedNumber) {
-            console.warn(`[RFID] Associated number not found : ${user.id}`);
+            console.warn(`Associated number not found : ${user.id}`);
             return;
         }
 
@@ -88,14 +92,14 @@ const rfidHandler = async (incomingMessage, client) => {
         const activeDays = activeDaysData.map(day => day.day);
 
         if (!activeDays.includes(today)) {
-            console.warn(`[RFID] User inactive today : ${user.id}`);
+            console.warn(`User inactive today : ${user.id}`);
             return
         }
 
 
         // Active Time Validation
         if (user.activeFrom && user.activeTo && (currentTime < user.activeFrom || currentTime > user.activeTo)) {
-            console.warn(`[RFID] User inactive at this time : ${user.id}`);
+            console.warn(`User inactive at this time : ${user.id}`);
             return;
         }
 
@@ -133,7 +137,9 @@ const rfidHandler = async (incomingMessage, client) => {
                     left: leftMinutes
                 },
                 numbers: associatedNumbers.map(number => number.phoneNumber),
-                allowed: true
+                allowed: true,
+                pulse_rate: 60,
+                unit_rate: Number(operator.per_min_price || 0),
             }
         }
 

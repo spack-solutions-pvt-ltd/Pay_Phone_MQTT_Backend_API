@@ -6,14 +6,14 @@ const callStartHandler = async (incomingMessage, client) => {
         const { data } = incomingMessage;
 
         if (!data) {
-            console.error("[HEARTBEAT] Missing data object");
+            console.error("Missing data object");
             return;
         }
 
         const { tid, cid, credits, min_left, number, time_stamp } = data;
 
         if (!tid) {
-            console.error("[HEARTBEAT] Missing terminal id");
+            console.error("Missing terminal id");
             return;
         }
 
@@ -23,7 +23,7 @@ const callStartHandler = async (incomingMessage, client) => {
         });
 
         if (!terminal) {
-            console.warn(`[HEARTBEAT] Terminal not found : ${tid}`);
+            console.warn(`Terminal not found : ${tid}`);
             return;
         }
 
