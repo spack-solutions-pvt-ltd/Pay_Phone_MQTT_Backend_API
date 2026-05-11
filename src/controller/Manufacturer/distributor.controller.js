@@ -195,9 +195,38 @@ const updateDistributor = async (req, res, next) => {
 
 };
 
+
+const updateStatusDistributor = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+
+
+        const distributor = await Distributor.findByPk(req.params.id);
+
+        if (!distributor) {
+            return res.status(404).json({
+                success: false,
+                message: "Distributor not found",
+            });
+        }
+
+        await distributor.update({ status });
+
+        return res.status(200).json({
+            success: true,
+            message: "Distributor Status updated successfully",
+            data: distributor,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+
+};
 module.exports = {
     createDistributor,
     getAllDistributors,
     getDistributorById,
     updateDistributor,
+    updateStatusDistributor
 };

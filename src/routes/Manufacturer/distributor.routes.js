@@ -1,7 +1,7 @@
 
 const express = require("express");
 
-const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, } = require("../../controller/Manufacturer/distributor.controller");
+const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, } = require("../../controller/Manufacturer/distributor.controller");
 const { createDistributorValidation, updateDistributorValidation } = require("../../validation/manufacturer/distributorValidation");
 const router = express.Router();
 
@@ -10,6 +10,7 @@ router.get("/", getAllDistributors);
 router.get("/:id", getDistributorById);
 router.post("/", createDistributorValidation, createDistributor);
 router.put("/:id", updateDistributorValidation, updateDistributor);
+router.patch("/:id", updateStatusDistributor);
 
 
 /**
@@ -241,6 +242,79 @@ router.put("/:id", updateDistributorValidation, updateDistributor);
  *                   type: object
  *       404:
  *         description: Distributor not found
+ */
+
+
+/**
+ * @swagger
+ * /v1/manufacturer/distributor/{id}:
+ *   patch:
+ *     summary: Update distributor status
+ *     tags: [Manufacturer Distributor]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Distributor ID
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Inactive, Blocked]
+ *                 example: Active
+ *     responses:
+ *       200:
+ *         description: Distributor status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Distributor Status updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     distributorId:
+ *                       type: string
+ *                       example: DST1001
+ *                     name:
+ *                       type: string
+ *                       example: ABC Distributor
+ *                     email:
+ *                       type: string
+ *                       example: distributor@example.com
+ *                     phone:
+ *                       type: string
+ *                       example: "9876543210"
+ *                     status:
+ *                       type: string
+ *                       example: Active
+ *       404:
+ *         description: Distributor not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
  */
 
 /**

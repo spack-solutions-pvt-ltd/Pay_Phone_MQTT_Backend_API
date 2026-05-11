@@ -41,6 +41,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false
     },
+    rfidCardId: DataTypes.BIGINT,
+    min_left: DataTypes.FLOAT,
     // type: DataTypes.ENUM('missed', 'answered', 'voicemail'),    
   }, {
     sequelize,

@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Terminal } = require("../../models");
+const { Terminal, Distributor, Operator } = require("../../models");
 
 const createTerminal = async (req, res, next) => {
 
@@ -84,6 +84,9 @@ const getAllTerminals = async (req, res, next) => {
 
         const { count, rows } = await Terminal.findAndCountAll({
             where: whereCondition,
+            include: [
+                { model: Distributor, as: "distributor", attributes: ["id", "name", "distributorId"] },
+                { model: Operator, as: "operator", attributes: ["id", "name", "operatorId"] }],
             limit,
             offset,
             order: [["id", "DESC"]],
@@ -157,9 +160,35 @@ const updateTerminal = async (req, res, next) => {
 
 };
 
+
+const statusUpdateTerminal = async (req, res, next) => {
+    try {
+        const { status } = req.body;
+        const terminal = await Terminal.findByPk(req.params.id);
+
+        if (!terminal) {
+            return res.status(404).json({
+                success: false,
+                message: "Terminal not found",
+            });
+        }
+
+        await terminal.update({ status });
+
+        return res.status(200).json({
+            success: true,
+            message: "Terminal status updated successfully",
+            data: terminal,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
 module.exports = {
     createTerminal,
     getAllTerminals,
     getTerminalById,
     updateTerminal,
+    statusUpdateTerminal
 };

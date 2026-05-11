@@ -1,7 +1,7 @@
 
 const express = require("express");
 const { createTerminalValidation, updateTerminalValidation } = require("../../validation/manufacturer/terminalValidation");
-const { createTerminal, getAllTerminals, getTerminalById, updateTerminal } = require("../../controller/Manufacturer/terminal.controller");
+const { createTerminal, getAllTerminals, getTerminalById, updateTerminal, statusUpdateTerminal } = require("../../controller/Manufacturer/terminal.controller");
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ router.get("/", getAllTerminals);
 router.get("/:id", getTerminalById);
 router.post("/", createTerminalValidation, createTerminal);
 router.put("/:id", updateTerminalValidation, updateTerminal);
+router.patch("/:id", statusUpdateTerminal);
 
 /**
  * @swagger
@@ -252,6 +253,73 @@ router.put("/:id", updateTerminalValidation, updateTerminal);
  *                   type: object
  *       404:
  *         description: Terminal not found
+ */
+
+
+/**
+ * @swagger
+ * /v1/manufacturer/terminal/{id}:
+ *   patch:
+ *     summary: Update terminal status
+ *     tags: [Manufacturer Terminal]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Terminal ID
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Active, Inactive, Blocked]
+ *                 example: Active
+ *     responses:
+ *       200:
+ *         description: Terminal status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Terminal status updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     terminalId:
+ *                       type: string
+ *                       example: TRM1001
+ *                     serialNo:
+ *                       type: string
+ *                       example: SN123456
+ *                     status:
+ *                       type: string
+ *                       example: Active
+ *       404:
+ *         description: Terminal not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
  */
 
 /**

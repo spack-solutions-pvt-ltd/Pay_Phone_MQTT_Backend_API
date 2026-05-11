@@ -36,9 +36,15 @@ module.exports = {
       creditsUsed: {
         type: Sequelize.DECIMAL
       },
-      status:{
+      status: {
         type: Sequelize.BOOLEAN,
         allowNull: false
+      },
+      rfidCardId: {
+        type: Sequelize.BIGINT
+      },
+      min_left: {
+        type: Sequelize.FLOAT
       },
       createdAt: {
         allowNull: false,

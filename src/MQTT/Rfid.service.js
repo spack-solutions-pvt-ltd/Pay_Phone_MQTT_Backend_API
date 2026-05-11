@@ -1,0 +1,151 @@
+const { Op } = require('sequelize');
+const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay, CallLog } = require('../models');
+
+const rfidHandler = async (incomingMessage, client) => {
+    try {
+        const { data } = incomingMessage
+
+        if (!data) {
+            console.error("[RFID] Missing data object");
+            return;
+        }
+
+        const { tid, cid } = data
+
+        const terminal = await Terminal.findOne({
+            where: { terminalId: tid },
+            attributes: ["id", "operatorId", "terminalId"]
+        });
+
+        if (!terminal) {
+            console.warn(`Terminal not found : ${tid}`);
+            return;
+        }
+
+        const card = await RFIDCard.findOne({
+            where: { cardNumber: cid }
+        });
+
+        if (!card) {
+            console.warn(`RFID Card not found : ${cid}`);
+            return;
+        }
+
+        const user = await User.findOne({
+            where: { id: card.userId },
+        });
+
+        if (!user) {
+            console.warn(`[RFID] User not found : ${card.userId}`);
+            return;
+        }
+
+        if (user.status == "Blocked") {
+            console.warn(` User blocked : ${card.userId}`);
+            return;
+        }
+
+        if (user.operatorId != terminal.operatorId) {
+            console.warn(`[RFID] User operator mismatch : ${card.userId}`);
+            return;
+        }
+
+        const userWallet = await wallet.findOne({
+            where: { userId: user.id, accountType: "User" }
+        });
+
+        if (userWallet.balance <= 0) {
+            console.warn(`User wallet balance not enough : ${user.id}`);
+            return;
+        }
+
+        const associatedNumber = await UserAssociatedNumber.findOne({
+            where: { userId: user.id },
+            attributes: ["phoneNumber"]
+        });
+
+        if (!associatedNumber) {
+            console.warn(`[RFID] Associated number not found : ${user.id}`);
+            return;
+        }
+
+
+        // Indian Timezone
+        const indiaTime = moment().tz("Asia/Kolkata");
+
+        const today = indiaTime.format("dddd");
+        const currentTime = indiaTime.format("HH:mm");
+
+        const activeDaysData = await UserActiveDay.findAll({
+            where: { userId: user.id }
+        });
+
+        if (!activeDaysData) {
+            console.warn(` User active days not found : ${user.id}`);
+            return;
+        }
+
+        const activeDays = activeDaysData.map(day => day.day);
+
+        if (!activeDays.includes(today)) {
+            console.warn(`[RFID] User inactive today : ${user.id}`);
+            return
+        }
+
+
+        // Active Time Validation
+        if (user.activeFrom && user.activeTo && (currentTime < user.activeFrom || currentTime > user.activeTo)) {
+            console.warn(`[RFID] User inactive at this time : ${user.id}`);
+            return;
+        }
+
+
+        // Today Call Usage
+        const todayUsedMinutes = await CallLog.sum("duration", {
+            where: {
+                userId: user.id,
+                createdAt: {
+                    [Op.between]: [
+                        indiaTime.clone().startOf("day").toDate(),
+                        indiaTime.clone().endOf("day").toDate()
+                    ]
+                }
+            }
+        });
+
+        const usedMinutes = Number(todayUsedMinutes || 0);
+
+        const leftMinutes = Math.max(Number(user.callDurationLimit) - usedMinutes, 0);
+
+        if (leftMinutes <= 0) {
+            console.warn(`Daily limit exceeded : ${user.id}`);
+            return
+        }
+
+        const res = {
+            type: "card_auth_response",
+            data: {
+                name: user.fullName,
+                credits: Number(userWallet?.balance || 0),
+                card_type: "locked",
+                day_minutes: {
+                    max: Number(user.callDurationLimit),
+                    left: leftMinutes
+                },
+                numbers: associatedNumbers.map(number => number.phoneNumber),
+                allowed: true
+            }
+        }
+
+        client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
+            if (err) {
+                console.error('Error message:', err);
+            }
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+module.exports = { rfidHandler }

@@ -36,6 +36,9 @@ module.exports = {
       remainingBalance: {
         type: Sequelize.DECIMAL
       },
+      userId: {
+        type: Sequelize.BIGINT
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

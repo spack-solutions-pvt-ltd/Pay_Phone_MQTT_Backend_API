@@ -125,6 +125,7 @@ const rechargeUserWallet = async (req, res, next) => {
                 remainingBalance: operatorUpdatedBalance,
                 transactionType: "TRANSFER_TO_USER",
                 paymentMode,
+                userId: user.id
             }, { transaction, });
 
         }

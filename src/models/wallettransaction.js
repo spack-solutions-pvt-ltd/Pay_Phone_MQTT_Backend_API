@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "operatorId",
         as: "operator"
       })
+      this.belongsTo(models.User, {
+        foreignKey: "userId",
+        as: "user"
+      })
     }
   }
   WalletTransaction.init({
@@ -39,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     remainingBalance: DataTypes.DECIMAL,
     distributorId: DataTypes.BIGINT,
     operatorId: DataTypes.BIGINT,
+    userId: DataTypes.BIGINT
   }, {
     sequelize,
     modelName: 'WalletTransaction',

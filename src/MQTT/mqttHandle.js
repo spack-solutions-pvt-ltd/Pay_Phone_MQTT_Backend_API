@@ -1,6 +1,11 @@
 
 const mqtt = require('mqtt')
 const { heartbeatHandler } = require('./heartbeat.service')
+const { Op } = require('sequelize')
+const { Terminal } = require('../models')
+const { rfidHandler } = require('./Rfid.service')
+const { endCallHandler } = require('./end.call.service')
+const { callStartHandler } = require('./call.start.service')
 
 const mqttPort = process.env.MQTT_PORT
 const userName = process.env.MQTT_USER_NAME
@@ -20,25 +25,37 @@ client.on('connect', () => {
 })
 
 client.on('message', function (topic, message, packet, done,) {
-    console.log("dass",packet,message.toString())
+    // console.log("dass", packet, message.toString())
     const incomingMessage = JSON.parse(message.toString());
-    
-    if (incomingMessage.type === 'heartbeat') {
-        // heartbeatHandler(incomingMessage, client);
+
+    if (!topic === 'sseiot') {
+        console.log("This is Other topic please check", topic)
     }
-    if (incomingMessage.type === 'card_auth_request') {
-        console.log("Rfid Card Request", incomingMessage.data)
+
+    switch (incomingMessage.type) {
+        case "heartbeat":
+            heartbeatHandler(incomingMessage, client);
+            break;
+
+        case "card_auth_request":
+            rfidHandler(incomingMessage, client);
+            break;
+
+        case "call_start":
+            callStartHandler(incomingMessage, client);
+            break;
+
+        case "call_end":
+            endCallHandler(incomingMessage, client);
+            break;
+
+        default:
+            console.log("Unknown packet type");
     }
-    if (incomingMessage.type === 'call_start') {
-        console.log("Call Start Event", incomingMessage.data)
-    }
-    if (incomingMessage.type === 'call_end') {
-        console.log("Call End Event", incomingMessage.data)
-    }
+
 });
 
-client.subscribe('SSE');
-client.subscribe('SSEE');
+client.subscribe('sseiot');
 
 client.on('error', function (error) {
     console.log(error);
@@ -53,17 +70,36 @@ client.on('offline', (res) => {
 });
 
 
+// Inactive if not come the heartbeat message
+const checkInactiveTerminals = async () => {
+    try {
+        const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
+
+        const [updatedCount] = await Terminal.update(
+            { status: "Inactive" },
+            { where: { status: "Active", lastPingAt: { [Op.lt]: threeMinutesAgo } } }
+        );
+
+    } catch (error) {
+        console.error("Inactive Check Error :", error);
+    }
+};
+
+// Run Every 1 Minute
+setInterval(checkInactiveTerminals, 60 * 1000);
+
+
 // publish message 
 // setInterval(() => {
 //     const message = {
 //         "type": "heartbeat",
 //         "data": {
-//             "tid": 35178,
+//             "tid": "TRM1002",
 //             "imei": "123456789012345",
 //             "sim": "6345789548"
 //         }
 //     }
-//     client.publish("SSE", JSON.stringify(message), (err) => {
+//     client.publish("sseiot", JSON.stringify(message), (err) => {
 //         if (err) {
 //             console.error('Error message:', err);
 //         }
