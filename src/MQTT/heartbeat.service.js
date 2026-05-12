@@ -14,7 +14,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const { tid, sim, imei } = data;
+        const { tid, sim, imei, status } = data;
 
         if (!tid) {
             console.error("[HEARTBEAT] Missing terminal id");
@@ -50,7 +50,6 @@ const heartbeatHandler = async (incomingMessage, client) => {
         const response = {
             type: "heartbeat_ack",
             time_stamp: Date.now(),
-            data: data,
         }
 
         return client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
