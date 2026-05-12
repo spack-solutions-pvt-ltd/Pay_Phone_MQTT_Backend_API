@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Terminal, Distributor, Operator } = require("../../models");
+const { unblockTerminal } = require("../../MQTT/mqttHandle");
 
 const createTerminal = async (req, res, next) => {
 
@@ -173,11 +174,16 @@ const statusUpdateTerminal = async (req, res, next) => {
             });
         }
 
-        await terminal.update({ status });
+        if (status == "Blocked") {
+            await blockTerminal(terminal.terminalId)
+        } else {
+            await unblockTerminal(terminal.terminalId)
+        }
+        // await terminal.update({ status });
 
         return res.status(200).json({
             success: true,
-            message: "Terminal status updated successfully",
+            message: `Terminal Request to ${status} successfully`,
             data: terminal,
         });
 

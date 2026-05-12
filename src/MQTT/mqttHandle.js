@@ -6,6 +6,7 @@ const { Terminal } = require('../models')
 const { rfidHandler } = require('./Rfid.service')
 const { endCallHandler } = require('./end.call.service')
 const { callStartHandler } = require('./call.start.service')
+const { blockTerminalHandler, unblockTerminalHandler } = require('./terminal.service')
 
 const mqttPort = process.env.MQTT_PORT
 const userName = process.env.MQTT_USER_NAME
@@ -49,10 +50,17 @@ client.on('message', function (topic, message, packet, done,) {
             endCallHandler(incomingMessage, client);
             break;
 
+        case "termina_blocked":
+            blockTerminalHandler(incomingMessage);
+            break;
+
+        case "termina_released":
+            unblockTerminalHandler(incomingMessage);
+            break;
+
         default:
             console.log("Unknown packet type");
     }
-
 });
 
 client.subscribe('sseiot');
@@ -69,6 +77,45 @@ client.on('offline', (res) => {
     console.log('MQTT client offline', res);
 });
 
+
+// Terminal Block 
+const blockTerminal = async (terminalId) => {
+    try {
+        const request = {
+            type: "termina_block",
+            data: {
+                tid: terminalId
+            }
+        }
+        client.publish(terminalId, JSON.stringify(request), (err) => {
+            if (err) {
+                console.error('Error message:', err);
+            }
+        },);
+
+    } catch (error) {
+        console.error("Block Terminal Error :", error);
+    }
+}
+
+const unblockTerminal = async (terminalId) => {
+    try {
+        const request = {
+            type: "termina_release",
+            data: {
+                tid: terminalId
+            }
+        }
+
+        client.publish(terminalId, JSON.stringify(request), (err) => {
+            if (err) {
+                console.error('Error message:', err);
+            }
+        },);
+    } catch (error) {
+        console.error("Block Terminal Error :", error);
+    }
+}
 
 // Inactive if not come the heartbeat message
 const checkInactiveTerminals = async () => {
@@ -106,4 +153,4 @@ setInterval(checkInactiveTerminals, 60 * 1000);
 //     },);
 // }, 5000);
 
-module.exports = { client };
+module.exports = { client, blockTerminal, unblockTerminal };
