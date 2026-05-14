@@ -23,9 +23,6 @@ const createTerminalValidation = [
         .notEmpty()
         .withMessage("Location is required"),
 
-    body("firmwareVersion")
-        .notEmpty()
-        .withMessage("Firmware version is required"),
 
     validationMiddleware,
 ];

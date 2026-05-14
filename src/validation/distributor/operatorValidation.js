@@ -1,5 +1,5 @@
 
-const { body ,param} = require("express-validator");
+const { body, param } = require("express-validator");
 const { validationMiddleware } = require("../../middleware/validationMiddleware");
 
 const createOperatorValidation = [
@@ -45,10 +45,10 @@ const updateOperatorValidation = [
 
 const rechargeOperatorWalletValidation = [
 
-    param("operatorId")
+    body("operatorId")
         .notEmpty()
         .withMessage("Operator id is required")
-        .isNumeric()
+        .isInt()
         .withMessage("Operator id must be number"),
     body("type")
         .notEmpty()

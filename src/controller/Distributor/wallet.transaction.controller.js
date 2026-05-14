@@ -16,7 +16,7 @@ const getDistributorWalletTransactions = async (req, res, next) => {
             distributorId,
         };
 
-        if (!operatorId) {
+        if (operatorId) {
             const wallet = await Wallet.findOne({
                 where: {
                     operatorId,
