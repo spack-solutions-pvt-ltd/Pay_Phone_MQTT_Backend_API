@@ -59,7 +59,7 @@ const getAllOperatorTerminals = async (req, res, next) => {
 const getTerminalById = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
-        const terminalId = req.params.terminalId;
+        const terminalId = req.params.id;
         const terminal = await Terminal.findOne({
             where: {
                 id: terminalId,
@@ -133,7 +133,7 @@ const getCallListByTerminalId = async (req, res, next) => {
         const { count, rows } = await CallLog.findAndCountAll({
             where: whereCondition,
             include: [
-                { model: User, as: "user", attributes: ["id", "name", "userId"] },
+                { model: User, as: "user", attributes: ["id", "fullName", "userId"] },
             ],
             limit,
             offset,
@@ -142,7 +142,7 @@ const getCallListByTerminalId = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: "Call list",
-            data: callList,
+            data: rows,
         });
 
     } catch (error) {

@@ -26,7 +26,7 @@ client.on('connect', () => {
 })
 
 client.on('message', function (topic, message, packet, done,) {
-    // console.log("dass", packet, message.toString())
+    console.log("dass",  message.toString())
     const incomingMessage = JSON.parse(message.toString());
 
     if (!topic === 'sseiot') {

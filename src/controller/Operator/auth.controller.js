@@ -2,7 +2,7 @@
 const bcrypt = require("bcryptjs");
 const { generateAccessToken, } = require("../../helpers/jwtHelper");
 const { createRefreshToken, } = require("../../helpers/refreshTokenHandle");
-const { Operator, RefreshToken, } = require("../../models");
+const { Operator, RefreshToken, Wallet } = require("../../models");
 const { sendOperatorForgotPasswordEmail, } = require("../../service/mailService");
 
 const operatorLogin = async (req, res, next) => {

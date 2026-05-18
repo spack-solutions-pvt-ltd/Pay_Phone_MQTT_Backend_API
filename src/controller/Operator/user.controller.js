@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog } = require("../../models");
+const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog, WalletTransaction } = require("../../models");
 
 
 
