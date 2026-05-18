@@ -68,7 +68,7 @@ const getUserById = async (req, res, next) => {
                 { model: UserAssociatedNumber, as: "associatedNumbers", },
                 { model: UserActiveDay, as: "activeDays", },
                 { model: Wallet, as: "wallet", },
-                { model: RFIDCard, as: "rfidCards" }
+                // { model: RFIDCard, as: "rfidCards" }
             ],
         });
 
