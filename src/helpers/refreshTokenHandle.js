@@ -107,7 +107,7 @@ const operatorRefreshTokenHandler = async (req, res, next) => {
         }
 
         const refToken = await RefreshToken.findOne({
-            where: { token: refreshToken, type: 'Distributor' },
+            where: { token: refreshToken, type: 'Operator' },
         });
 
         if (!refToken) {
