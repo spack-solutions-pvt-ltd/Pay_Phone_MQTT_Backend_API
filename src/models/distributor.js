@@ -29,7 +29,10 @@ module.exports = (sequelize, DataTypes) => {
   Distributor.init({
     distributorId: DataTypes.STRING,
     name: DataTypes.STRING,
-    email: DataTypes.STRING,
+    email: {
+      type: DataTypes.STRING,
+      unique: true
+    },
     phone: DataTypes.STRING,
     password: DataTypes.STRING,
     companyName: DataTypes.STRING,
