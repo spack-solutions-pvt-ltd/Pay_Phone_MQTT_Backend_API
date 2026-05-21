@@ -119,7 +119,7 @@ const operatorRefreshTokenHandler = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "Refresh token has expired" });
         }
 
-        const accessToken = generateAccessToken(refToken.userId, 'Distributor');
+        const accessToken = generateAccessToken(refToken.userId, 'Operator');
 
         res.status(200).json({
             success: true,
