@@ -232,6 +232,11 @@ const walletTranactions = async (req, res, next) => {
             ];
         }
 
+        // type
+        if (type) {
+            whereCondition.paymentMode = type;
+        }
+
         const { count, rows: walletTransactions } = await WalletTransaction.findAndCountAll({
             where: whereCondition,
             include: [

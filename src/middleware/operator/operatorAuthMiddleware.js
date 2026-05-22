@@ -25,7 +25,7 @@ const operatorAuthMiddleware = async (req, res, next) => {
             });
         }
         const operator = await Operator.findByPk(decoded.id, {
-            attributes: ['id', 'email', 'name']
+            attributes: ['id', 'email', 'name', 'status']
         });
         if (!operator) {
             return res.status(404).json({
@@ -33,7 +33,12 @@ const operatorAuthMiddleware = async (req, res, next) => {
                 message: "Operator not found",
             });
         }
-
+        if (operator.status !== "Active") {
+            return res.status(403).json({
+                success: false,
+                message: "your account is " + operator.status + " please contact admin",
+            });
+        }
         req.operator = operator;
 
         next();

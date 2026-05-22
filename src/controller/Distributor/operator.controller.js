@@ -219,111 +219,162 @@ const updateOperator = async (req, res, next) => {
 
 };
 const reachargeOperatorWallet = async (req, res, next) => {
-
     const transaction = await sequelize.transaction();
 
     try {
-
         const distributorId = req.distributor.id;
+        let { operatorId, amount, type, paymentMode, } = req.body;
 
-        const { operatorId, amount, type, paymentMode, } = req.body;
+        // VALIDATIONS
+
+        amount = Number(amount);
+
+        if (!operatorId) {
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Operator id is required", });
+        }
 
         if (!amount || amount <= 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Valid amount required",
-            });
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Valid amount is required", });
         }
 
-        if (!type || !["Credit", "Debit"].includes(type)) {
-            return res.status(400).json({
-                success: false,
-                message: "Type must be Credit or Debit",
-            });
+        if (!["Credit", "Debit"].includes(type)) {
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Type must be Credit or Debit", });
         }
 
+        // DISTRIBUTOR WALLET
+        const distributorWallet = await Wallet.findOne({
+            where: {
+                distributorId,
+                accountType: "Distributor",
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+
+        if (!distributorWallet) {
+            await transaction.rollback();
+            return res.status(404).json({ success: false, message: "Distributor wallet not found", });
+        }
+
+        // OPERATOR CHECK
         const operator = await Operator.findOne({
             where: {
                 id: operatorId,
                 distributorId,
             },
+            attributes: ["id", "name"],
             transaction,
         });
 
         if (!operator) {
             await transaction.rollback();
-            return res.status(404).json({
-                success: false,
-                message: "Operator not found",
-            });
-
+            return res.status(404).json({ success: false, message: "Operator not found", });
         }
 
-        let wallet = await Wallet.findOne({
+        // OPERATOR WALLET
+        let operatorWallet = await Wallet.findOne({
             where: {
                 operatorId: operator.id,
                 accountType: "Operator",
             },
             transaction,
+            lock: transaction.LOCK.UPDATE,
         });
 
-        // create wallet
-        if (!wallet) {
-
-            wallet = await Wallet.create({
+        // Create wallet if not exists
+        if (!operatorWallet) {
+            operatorWallet = await Wallet.create({
                 operatorId: operator.id,
                 balance: 0,
                 accountType: "Operator",
             }, { transaction, });
-
         }
 
-        const previousBalance = Number(wallet.balance);
-        let updatedBalance = previousBalance;
+        const distributorPreviousBalance = Number(distributorWallet.balance);
+        const operatorPreviousBalance = Number(operatorWallet.balance);
 
-        // credit
+        let distributorUpdatedBalance = distributorPreviousBalance;
+        let operatorUpdatedBalance = operatorPreviousBalance;
+
+        // CREDIT LOGIC
+        // Distributor -> Operator
+
         if (type === "Credit") {
-            updatedBalance = previousBalance + Number(amount);
-        }
 
-        // debit
-        if (type === "Debit") {
-
-            if (previousBalance < Number(amount)) {
+            // Distributor balance check
+            if (distributorPreviousBalance < amount) {
                 await transaction.rollback();
-                return res.status(400).json({
-                    success: false,
-                    message: "Insufficient wallet balance",
-                });
-
+                return res.status(400).json({ success: false, message: "Distributor has insufficient balance", });
             }
-            updatedBalance = previousBalance - Number(amount);
+
+            // Deduct from distributor
+            distributorUpdatedBalance = distributorPreviousBalance - amount;
+
+            // Add to operator
+            operatorUpdatedBalance = operatorPreviousBalance + amount;
         }
 
-        wallet.balance = updatedBalance;
+        // DEBIT LOGIC
+        // Operator -> Distributor
 
-        await wallet.save({
-            transaction,
-        });
+        if (type === "Debit") {
+            // Operator balance check
+            if (operatorPreviousBalance < amount) {
+                await transaction.rollback();
+                return res.status(400).json({ success: false, message: "Operator has insufficient balance", });
+            }
 
-        // wallet transaction
+            // Deduct from operator
+            operatorUpdatedBalance = operatorPreviousBalance - amount;
+
+            // Add back to distributor
+            distributorUpdatedBalance = distributorPreviousBalance + amount;
+        }
+
+        // UPDATE WALLET BALANCES
+        distributorWallet.balance = distributorUpdatedBalance;
+        operatorWallet.balance = operatorUpdatedBalance;
+
+        await distributorWallet.save({ transaction });
+        await operatorWallet.save({ transaction });
+
+        // DISTRIBUTOR TRANSACTION
         await WalletTransaction.create({
-            transactionId: `WTX${Date.now()}`,
-            walletId: wallet.id,
+            transactionId: `WTX${Date.now()}D`,
+            walletId: distributorWallet.id,
+            amount,
+            type: type === "Credit" ? "Debit" : "Credit",
+            transactionType: type === "Credit" ? "TRANSFER_TO_OPERATOR" : "RECEIVED_FROM_OPERATOR",
+            remainingBalance: distributorUpdatedBalance,
+            paymentMode: paymentMode || "Wallet Transfer",
+            operatorId: operator.id,
+        }, { transaction, });
+
+        // OPERATOR TRANSACTION
+
+        await WalletTransaction.create({
+            transactionId: `WTX${Date.now()}O`,
+            walletId: operatorWallet.id,
+            distributorId,
             amount,
             type,
-            remainingBalance: updatedBalance,
-            transactionType: type === "Credit" ? "ADD_FUNDS" : "DEDUCT_FUNDS",
-            distributorId,
-            paymentMode: paymentMode || "Distributor Recharge",
-
+            transactionType: type === "Credit" ? "RECEIVED_FROM_DISTRIBUTOR" : "RETURNED_TO_DISTRIBUTOR",
+            remainingBalance: operatorUpdatedBalance,
+            paymentMode: paymentMode || "Wallet Transfer",
         }, { transaction, });
 
         await transaction.commit();
 
         return res.status(200).json({
             success: true,
-            message: type === "Credit" ? "Wallet credited successfully" : "Wallet debited successfully",
+            message: type === "Credit" ? "Amount transferred to operator successfully" : "Amount returned from operator successfully",
+            data: {
+                distributorBalance: distributorUpdatedBalance,
+                operatorBalance: operatorUpdatedBalance,
+            },
         });
 
     } catch (error) {

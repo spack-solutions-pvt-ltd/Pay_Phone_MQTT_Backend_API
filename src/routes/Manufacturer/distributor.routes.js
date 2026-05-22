@@ -1,7 +1,7 @@
 
 const express = require("express");
 
-const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, } = require("../../controller/Manufacturer/distributor.controller");
+const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, rechargeDistributorWallet, } = require("../../controller/Manufacturer/distributor.controller");
 const { createDistributorValidation, updateDistributorValidation } = require("../../validation/manufacturer/distributorValidation");
 const router = express.Router();
 
@@ -11,7 +11,7 @@ router.get("/:id", getDistributorById);
 router.post("/", createDistributorValidation, createDistributor);
 router.put("/:id", updateDistributorValidation, updateDistributor);
 router.patch("/:id", updateStatusDistributor);
-
+router.post("/wallet/recharge", rechargeDistributorWallet);
 
 /**
  * @swagger
@@ -327,4 +327,72 @@ router.patch("/:id", updateStatusDistributor);
  *       bearerFormat: JWT
  */
 
+
+/**
+ * @swagger
+ * /v1/manufacturer/distributor/wallet/recharge:
+ *   post:
+ *     summary: Recharge distributor wallet
+ *     tags: [Manufacturer Distributor]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - distributorId
+ *               - amount
+ *               - type
+ *             properties:
+ *               distributorId:
+ *                 type: integer
+ *                 example: 1
+ *               amount:
+ *                 type: number
+ *                 example: 5000
+ *               type:
+ *                 type: string
+ *                 enum: [Credit, Debit]
+ *                 example: Credit
+ *               paymentMode:
+ *                 type: string
+ *                 example: UPI
+ *     responses:
+ *       200:
+ *         description: Distributor wallet updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Distributor wallet credited successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     distributorId:
+ *                       type: integer
+ *                       example: 1
+ *                     previousBalance:
+ *                       type: number
+ *                       example: 1000
+ *                     updatedBalance:
+ *                       type: number
+ *                       example: 6000
+ *       400:
+ *         description: Invalid request or insufficient balance
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Distributor not found
+ *       500:
+ *         description: Internal server error
+ */
 module.exports = router;

@@ -28,7 +28,7 @@ const distributorAuthMiddleware = async (req, res, next) => {
             });
         }
         const distributor = await Distributor.findByPk(decoded.id, {
-            attributes: ['id', 'email', 'name']
+            attributes: ['id', 'email', 'name', 'status']
             // {
             //     exclude: ["password"]
             // },
@@ -37,6 +37,12 @@ const distributorAuthMiddleware = async (req, res, next) => {
             return res.status(404).json({
                 success: false,
                 message: "Distributor not found",
+            });
+        }
+        if (distributor.status !== "Active") {
+            return res.status(403).json({
+                success: false,
+                message: "your account is " + distributor.status + " please contact admin",
             });
         }
 

@@ -11,11 +11,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.hasMany(models.WalletTransaction, {
+        foreignKey: "manufacturerId",
+        as: "walletTransactions"
+      })
     }
   }
   Manufacturer.init({
     name: DataTypes.STRING,
-    email:{
+    email: {
       type: DataTypes.STRING,
       unique: true
     },

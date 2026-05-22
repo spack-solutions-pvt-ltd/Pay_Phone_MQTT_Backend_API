@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "distributorId",
         as: "walletTransactions"
       })
+      this.hasMany(models.Wallet, {
+        foreignKey: "distributorId",
+        as: "wallets"
+      })
     }
   }
   Distributor.init({

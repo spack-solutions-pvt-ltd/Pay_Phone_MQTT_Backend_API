@@ -12,8 +12,16 @@ const getDistributorWalletTransactions = async (req, res, next) => {
 
         const offset = (page - 1) * limit;
 
+        const wallet = await Wallet.findOne({
+            where: {
+                distributorId,
+                accountType: "Distributor",
+            },
+            attributes: ["id"],
+        });
+
         const whereCondition = {
-            distributorId,
+            walletId: wallet.id,
         };
 
         if (operatorId) {

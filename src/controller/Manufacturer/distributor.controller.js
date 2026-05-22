@@ -1,4 +1,4 @@
-const { Distributor, } = require("../../models");
+const { Distributor, Wallet } = require("../../models");
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
 const { sendDistributorCredentialsEmail, } = require("../../service/mailService");
@@ -49,6 +49,12 @@ const createDistributor = async (req, res, next) => {
             companyName,
             gstNumber,
             location,
+        });
+
+        await Wallet.create({
+            distributorId: distributor.id,
+            balance: 0,
+            accountType: "Distributor"
         });
 
         await sendDistributorCredentialsEmail({
@@ -223,10 +229,124 @@ const updateStatusDistributor = async (req, res, next) => {
     }
 
 };
+
+const rechargeDistributorWallet = async (req, res, next) => {
+
+    const transaction = await sequelize.transaction();
+
+    try {
+        const manufacturerId = req.manufacturer.id;
+
+        const { distributorId, amount, type, paymentMode, } = req.body;
+
+        if (!distributorId) {
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Distributor id is required", });
+        }
+
+        if (!amount || Number(amount) <= 0) {
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Valid amount required", });
+        }
+
+        if (!type || !["Credit", "Debit"].includes(type)) {
+            await transaction.rollback();
+            return res.status(400).json({ success: false, message: "Type must be Credit or Debit", });
+        }
+
+        const distributor = await Distributor.findOne({
+            where: {
+                id: distributorId,
+                manufacturerId,
+            },
+            transaction,
+            attributes: ["id", "name"],
+        });
+
+        if (!distributor) {
+            await transaction.rollback();
+            return res.status(404).json({ success: false, message: "Distributor not found", });
+        }
+
+        // FIND DISTRIBUTOR WALLET
+        let wallet = await Wallet.findOne({
+            where: {
+                distributorId: distributor.id,
+                accountType: "Distributor",
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
+
+        // CREATE WALLET
+        if (!wallet) {
+            wallet = await Wallet.create({
+                distributorId: distributor.id,
+                balance: 0,
+                accountType: "Distributor",
+            }, { transaction, });
+        }
+
+        // BALANCE LOGIC
+        const previousBalance = Number(wallet.balance);
+
+        let updatedBalance = previousBalance;
+
+        // CREDIT
+        if (type === "Credit") {
+            updatedBalance = previousBalance + Number(amount);
+        }
+
+        // DEBIT
+        if (type === "Debit") {
+            if (previousBalance < Number(amount)) {
+                await transaction.rollback();
+                return res.status(400).json({ success: false, message: "Insufficient distributor wallet balance", });
+            }
+
+            updatedBalance = previousBalance - Number(amount);
+        }
+
+        // UPDATE BALANCE
+        wallet.balance = updatedBalance;
+
+        await wallet.save({ transaction, });
+
+        // WALLET TRANSACTION
+        await WalletTransaction.create({
+            transactionId: `WTX${Date.now()}`,
+            walletId: wallet.id,
+            manufacturerId,
+            amount,
+            type,
+            remainingBalance: updatedBalance,
+            transactionType: type === "Credit" ? "MANUFACTURER_CREDIT" : "MANUFACTURER_DEBIT",
+            paymentMode: paymentMode || "Manufacturer Recharge",
+        }, { transaction, });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            success: true,
+            message: type === "Credit" ? "Distributor wallet credited successfully" : "Distributor wallet debited successfully",
+            data: {
+                distributorId: distributor.id,
+                previousBalance,
+                updatedBalance,
+            },
+        });
+
+    } catch (error) {
+        await transaction.rollback();
+        next(error);
+    }
+};
+
 module.exports = {
     createDistributor,
     getAllDistributors,
     getDistributorById,
     updateDistributor,
-    updateStatusDistributor
+    updateStatusDistributor,
+    rechargeDistributorWallet,
 };

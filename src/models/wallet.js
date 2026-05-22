@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
         as: "operator"
       })
 
+      this.belongsTo(models.Distributor, {
+        foreignKey: "distributorId",
+        as: "distributor"
+      })
+
       this.hasMany(models.WalletTransaction, {
         foreignKey: "walletId",
         as: "transactions"
@@ -31,7 +36,8 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.BIGINT,
     operatorId: DataTypes.BIGINT,
     balance: DataTypes.DECIMAL,
-    accountType: DataTypes.ENUM("Distributor", "Operator", "User")
+    accountType: DataTypes.ENUM("Distributor", "Operator", "User"),
+    distributorId: DataTypes.BIGINT,
   }, {
     sequelize,
     modelName: 'Wallet',
