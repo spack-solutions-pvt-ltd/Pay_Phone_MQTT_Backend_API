@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const { generateAccessToken, } = require("../../helpers/jwtHelper");
 const { createRefreshToken, } = require("../../helpers/refreshTokenHandle");
 
-const { Distributor, RefreshToken, } = require("../../models");
+const { Distributor, RefreshToken, Wallet } = require("../../models");
 
 const {
     sendDistributorForgotPasswordEmail,
@@ -75,14 +75,12 @@ const getDistributorByToken = async (req, res, next) => {
 
     try {
 
-        const distributor = await Distributor.findByPk(
-            req.distributor.id,
-            {
-                attributes: {
-                    exclude: ["password"],
-                },
-            }
-        );
+        const distributor = await Distributor.findByPk(req.distributor.id, {
+            attributes: {
+                exclude: ["password"],
+            },
+            include: [{ model: Wallet, as: "wallet", attributes: ['id', 'balance'] }]
+        });
 
         return res.status(200).json({
             success: true,

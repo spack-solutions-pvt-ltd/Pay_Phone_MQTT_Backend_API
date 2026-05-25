@@ -24,9 +24,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "distributorId",
         as: "walletTransactions"
       })
-      this.hasMany(models.Wallet, {
+      this.hasOne(models.Wallet, {
         foreignKey: "distributorId",
-        as: "wallets"
+        as: "wallet"
       })
     }
   }

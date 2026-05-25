@@ -54,11 +54,8 @@ const getDistributorWalletTransactions = async (req, res, next) => {
         const { count, rows } = await WalletTransaction.findAndCountAll({
             where: whereCondition,
             include: [{
-                model: Wallet, as: "wallet", attributes: ["id", "operatorId"],
-                include: [{
-                    model: Operator, as: "operator",
-                    attributes: ["id", "name", "operatorId"]
-                }]
+                model: Operator, as: "operator",
+                attributes: ["id", "name", "operatorId"]
             }],
             limit,
             offset,

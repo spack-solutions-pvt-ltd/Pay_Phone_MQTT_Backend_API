@@ -1,4 +1,4 @@
-const { Distributor, Wallet } = require("../../models");
+const { Distributor, Wallet, WalletTransaction, sequelize, Operator } = require("../../models");
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
 const { sendDistributorCredentialsEmail, } = require("../../service/mailService");
@@ -149,7 +149,12 @@ const getDistributorById = async (req, res, next) => {
     try {
 
         const distributor = await Distributor.findByPk(req.params.id,
-            { attributes: { exclude: ["password"], }, }
+            {
+                attributes: { exclude: ["password"], },
+                include: [
+                    { model: Wallet, as: "wallet", attributes: ["balance", "id"], },
+                ],
+            }
         );
 
         if (!distributor) {
@@ -257,7 +262,6 @@ const rechargeDistributorWallet = async (req, res, next) => {
         const distributor = await Distributor.findOne({
             where: {
                 id: distributorId,
-                manufacturerId,
             },
             transaction,
             attributes: ["id", "name"],
@@ -342,6 +346,94 @@ const rechargeDistributorWallet = async (req, res, next) => {
     }
 };
 
+const getDistributorWalletTransactions = async (req, res, next) => {
+    try {
+
+        const distributorId = req.params.distributorId;
+
+        let { page = 1, limit = 10, type, transactionType, search = "", } = req.query;
+
+        page = Number(page);
+        limit = Number(limit);
+
+        const offset = (page - 1) * limit;
+
+        const distributor = await Distributor.findOne({
+            where: {
+                id: distributorId,
+            },
+            attributes: ["id"],
+        });
+
+        if (!distributor) {
+            return res.status(404).json({
+                success: false,
+                message: "Distributor not found",
+            });
+        }
+
+        const wallet = await Wallet.findOne({
+            where: {
+                distributorId,
+                accountType: "Distributor",
+            },
+        });
+
+        if (!wallet) {
+            return res.status(404).json({
+                success: false,
+                message: "Wallet not found",
+            });
+        }
+
+        const whereCondition = {
+            walletId: wallet.id,
+            // distributorId,
+        };
+
+        if (type) {
+            whereCondition.type = type;
+        }
+
+        // transaction type filter
+        if (transactionType) {
+            whereCondition.transactionType = transactionType;
+        }
+
+        if (search) {
+            whereCondition[Op.or] = [
+                { transactionId: { [Op.like]: `%${search}%`, }, },
+                { paymentMode: { [Op.like]: `%${search}%`, }, },
+            ];
+        }
+
+        const { count, rows } = await WalletTransaction.findAndCountAll({
+            where: whereCondition,
+            include: [
+                { model: Operator, as: "operator", attributes: ["id", "name"], },
+            ],
+            limit,
+            offset,
+            order: [["id", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Wallet transaction list",
+            data: rows,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createDistributor,
     getAllDistributors,
@@ -349,4 +441,5 @@ module.exports = {
     updateDistributor,
     updateStatusDistributor,
     rechargeDistributorWallet,
+    getDistributorWalletTransactions,
 };

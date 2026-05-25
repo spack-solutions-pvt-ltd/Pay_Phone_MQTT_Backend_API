@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const { Operator, sequelize, Wallet, WalletTransaction, Terminal, User, } = require("../../models");
+const { Operator, sequelize, Wallet, WalletTransaction, Terminal, User, Distributor } = require("../../models");
 const { sendOperatorCredentialsEmail } = require("../../service/mailService");
 const { generatePassword } = require("../../utils/generatePassword");
 
@@ -307,7 +307,7 @@ const reachargeOperatorWallet = async (req, res, next) => {
             // Distributor balance check
             if (distributorPreviousBalance < amount) {
                 await transaction.rollback();
-                return res.status(400).json({ success: false, message: "Distributor has insufficient balance", });
+                return res.status(400).json({ success: false, message: "You have insufficient balance", });
             }
 
             // Deduct from distributor
@@ -426,7 +426,7 @@ const getOperatorWalletTransactions = async (req, res, next) => {
 
         const whereCondition = {
             walletId: wallet.id,
-            distributorId,
+            // distributorId,
         };
 
         if (type) {
@@ -447,6 +447,9 @@ const getOperatorWalletTransactions = async (req, res, next) => {
 
         const { count, rows } = await WalletTransaction.findAndCountAll({
             where: whereCondition,
+            include: [
+                { model: User, as: "user", attributes: ["id", "fullName"], },
+            ],
             limit,
             offset,
             order: [["id", "DESC"]],

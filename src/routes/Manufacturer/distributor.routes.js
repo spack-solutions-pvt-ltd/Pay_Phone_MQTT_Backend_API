@@ -1,17 +1,18 @@
 
 const express = require("express");
 
-const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, rechargeDistributorWallet, } = require("../../controller/Manufacturer/distributor.controller");
+const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, rechargeDistributorWallet, getDistributorWalletTransactions, } = require("../../controller/Manufacturer/distributor.controller");
 const { createDistributorValidation, updateDistributorValidation } = require("../../validation/manufacturer/distributorValidation");
 const router = express.Router();
 
 
 router.get("/", getAllDistributors);
+router.get("/wallet-transactions/:distributorId", getDistributorWalletTransactions);
 router.get("/:id", getDistributorById);
 router.post("/", createDistributorValidation, createDistributor);
 router.put("/:id", updateDistributorValidation, updateDistributor);
 router.patch("/:id", updateStatusDistributor);
-router.post("/wallet/recharge", rechargeDistributorWallet);
+router.post("/wallet-recharge", rechargeDistributorWallet);
 
 /**
  * @swagger
@@ -330,7 +331,7 @@ router.post("/wallet/recharge", rechargeDistributorWallet);
 
 /**
  * @swagger
- * /v1/manufacturer/distributor/wallet/recharge:
+ * /v1/manufacturer/distributor/wallet-recharge:
  *   post:
  *     summary: Recharge distributor wallet
  *     tags: [Manufacturer Distributor]
