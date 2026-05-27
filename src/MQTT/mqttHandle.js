@@ -7,6 +7,7 @@ const { rfidHandler } = require('./Rfid.service')
 const { endCallHandler } = require('./end.call.service')
 const { callStartHandler } = require('./call.start.service')
 const { blockTerminalHandler, unblockTerminalHandler } = require('./terminal.service')
+const { runningCallHandler } = require('./running.call.service')
 
 const mqttPort = process.env.MQTT_PORT
 const userName = process.env.MQTT_USER_NAME
@@ -52,15 +53,19 @@ client.on('message', function (topic, message, packet, done,) {
             callStartHandler(incomingMessage, client);
             break;
 
+        case "CUPD":
+            runningCallHandler(incomingMessage, client);
+            break;
+
         case "CEND":
             endCallHandler(incomingMessage, client);
             break;
 
-        case "CUPD":
+        case "termina_block":
             blockTerminalHandler(incomingMessage);
             break;
 
-        case "CUPDACK":
+        case "termina_release":
             unblockTerminalHandler(incomingMessage);
             break;
 
@@ -129,7 +134,7 @@ const checkInactiveTerminals = async () => {
         const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
 
         const [updatedCount] = await Terminal.update(
-            { status: "Inactive" },
+            { status: "Disconnected" },
             { where: { status: "Active", lastPingAt: { [Op.lt]: threeMinutesAgo } } }
         );
 

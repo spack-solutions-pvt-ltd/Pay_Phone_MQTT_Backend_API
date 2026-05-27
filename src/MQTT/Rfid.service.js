@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
-const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay, CallLog } = require('../models');
+const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay,
+    CallLog, Operator, Wallet } = require('../models');
+const moment = require('moment-timezone');
 
 const rfidHandler = async (incomingMessage, client) => {
     try {
@@ -59,7 +61,7 @@ const rfidHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const userWallet = await wallet.findOne({
+        const userWallet = await Wallet.findOne({
             where: { userId: user.id, accountType: "User" }
         });
 
@@ -68,9 +70,9 @@ const rfidHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const associatedNumber = await UserAssociatedNumber.findOne({
+        const associatedNumber = await UserAssociatedNumber.findAll({
             where: { userId: user.id },
-            attributes: ["phoneNumber"]
+            attributes: ["phoneNumber", "id"]
         });
 
         if (!associatedNumber) {
@@ -133,17 +135,15 @@ const rfidHandler = async (incomingMessage, client) => {
 
         const res = {
             type: "CARSP",
-            data: {
-                name: user.fullName,
-                credits: Number(userWallet?.balance || 0),
-                card_type: "locked",
-                day_max: Number(user.callDurationLimit),
-                day_left: leftMinutes,
-                numbers: associatedNumbers.map(number => number.phoneNumber),
-                allowed: true,
-                pulse_rate: 60,
-                unit_rate: Number(operator.per_min_price || 0),
-            }
+            name: user.fullName,
+            credits: Number(userWallet?.balance || 0),
+            card_type: "locked",
+            day_max: Number(user.callDurationLimit),
+            day_left: leftMinutes,
+            numbers: associatedNumber.map(number => number.phoneNumber),
+            allowed: true,
+            pulse_rate: 60,
+            unit_rate: Number(operator.per_min_price || 0),
         }
 
         client.publish(`${terminal.terminalId}`, JSON.stringify(res), (err) => {

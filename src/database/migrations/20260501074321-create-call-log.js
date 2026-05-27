@@ -46,6 +46,12 @@ module.exports = {
       min_left: {
         type: Sequelize.FLOAT
       },
+      start_credits: {
+        type: Sequelize.DECIMAL
+      },
+      end_credits: {
+        type: Sequelize.DECIMAL
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

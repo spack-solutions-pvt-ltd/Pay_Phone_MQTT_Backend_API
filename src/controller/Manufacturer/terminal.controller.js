@@ -5,10 +5,11 @@ const { unblockTerminal } = require("../../MQTT/mqttHandle");
 const createTerminal = async (req, res, next) => {
 
     try {
-        const { serialNo, distributorId, operatorId, campus, location, firmwareVersion, } = req.body;
+        const { terminalId, distributorId, operatorId, campus, location, } = req.body;
 
         const existingTerminal = await Terminal.findOne({
-            where: { serialNo, },
+            where: { terminalId, },
+            attributes: ["id", "terminalId",],
         });
 
         if (existingTerminal) {
@@ -21,13 +22,11 @@ const createTerminal = async (req, res, next) => {
         const terminalCount = await Terminal.count();
 
         const terminal = await Terminal.create({
-            terminalId: `TRM${1000 + terminalCount + 1}`,
-            serialNo,
+            terminalId,
             distributorId,
-            operatorId,
+            operatorId: operatorId || null,
             campus,
             location,
-            firmwareVersion,
         });
 
         return res.status(201).json({
@@ -191,6 +190,86 @@ const statusUpdateTerminal = async (req, res, next) => {
         next(error);
     }
 }
+
+const bulkCreateTerminal = async (req, res, next) => {
+    try {
+        const { distributorId, terminals = [] } = req.body;
+
+        const distributor = await Distributor.findByPk(distributorId, {
+            attributes: ["id", "name", "distributorId"],
+        });
+
+        if (!distributor) {
+            return res.status(404).json({
+                success: false,
+                message: "Distributor not found",
+            });
+        }
+
+        if (!Array.isArray(terminals) || terminals.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Terminals array is required",
+            });
+        }
+
+        // PREPARE DATA
+        const terminalData = terminals.map((item) => ({
+            terminalId: item.terminalId,
+            distributorId,
+            simNo: item.simNo || null,
+            serialNo: item.serialNo || null,
+            campus: item.campus || null,
+            location: item.location || null,
+        }));
+
+        // REMOVE DUPLICATE terminalIds FROM REQUEST
+        const uniqueTerminalMap = new Map();
+
+        terminalData.forEach((item) => {
+            uniqueTerminalMap.set(item.terminalId, item);
+        });
+
+        const uniqueTerminals = [...uniqueTerminalMap.values()];
+
+        // CHECK EXISTING terminalIds
+        const existingTerminals = await Terminal.findAll({
+            where: {
+                terminalId: uniqueTerminals.map((t) => t.terminalId),
+            },
+            attributes: ["terminalId"],
+        });
+
+        const existingIds = existingTerminals.map((t) => t.terminalId);
+
+        // FILTER NEW TERMINALS ONLY
+        const newTerminals = uniqueTerminals.filter(
+            (t) => !existingIds.includes(t.terminalId)
+        );
+
+        if (newTerminals.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "All terminalIds already exist",
+            });
+        }
+
+        // BULK CREATE
+        const createdTerminals = await Terminal.bulkCreate(newTerminals);
+
+        return res.status(201).json({
+            success: true,
+            message: `${createdTerminals.length} terminals created successfully`,
+            data: {
+                createdTerminals,
+                skippedTerminalIds: existingIds,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
 module.exports = {
     createTerminal,
     getAllTerminals,

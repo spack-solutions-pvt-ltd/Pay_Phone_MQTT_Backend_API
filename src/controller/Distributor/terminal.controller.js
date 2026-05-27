@@ -5,11 +5,12 @@ const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
 const createDistributorTerminal = async (req, res, next) => {
     try {
         const distributorId = req.distributor.id;
-// firmwareVersion
-        const { serialNo, operatorId, campus, location, } = req.body;
+
+        const { terminalId, operatorId, campus, location, } = req.body;
 
         const existingTerminal = await Terminal.findOne({
-            where: { serialNo, },
+            where: { terminalId, },
+            attributes: ["id", "terminalId",],
         });
 
         if (existingTerminal) {
@@ -22,13 +23,11 @@ const createDistributorTerminal = async (req, res, next) => {
         const terminalCount = await Terminal.count();
 
         const terminal = await Terminal.create({
-            terminalId: `TRM${1000 + terminalCount + 1}`,
-            serialNo,
+            terminalId: terminalId,
             distributorId,
             operatorId,
             campus,
             location,
-            // firmwareVersion,
         });
 
         return res.status(201).json({
@@ -184,6 +183,7 @@ const statusUpdateDistributorTerminal = async (req, res, next) => {
         next(error);
     }
 }
+
 module.exports = {
     createDistributorTerminal,
     getAllDistributorTerminals,

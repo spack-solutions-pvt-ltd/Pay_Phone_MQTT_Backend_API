@@ -49,7 +49,8 @@ const callStartHandler = async (incomingMessage, client) => {
             startTime: time_stamp,
             associatedNumberId: associatedNumber.id,
             rfidCardId: card.id,
-            min_left: min_left
+            min_left: min_left,
+            start_credits: credits,
         })
 
         const response = {

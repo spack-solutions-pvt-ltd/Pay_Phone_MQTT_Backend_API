@@ -470,6 +470,74 @@ const getDistributorDashboardCards = async (req, res, next) => {
     }
 }
 
+const getAllTerminalsByDistributorId = async (req, res, next) => {
+    try {
+        const distributorId = req.params.distributorId;
+
+        let { page = 1, limit = 10, search = "", status, } = req.query;
+
+        page = Number(page);
+        limit = Number(limit);
+
+        const offset = (page - 1) * limit;
+
+        const distributor = await Distributor.findOne({
+            where: {
+                id: distributorId,
+            },
+            attributes: ["id"],
+        });
+
+        if (!distributor) {
+            return res.status(404).json({
+                success: false,
+                message: "Distributor not found",
+            });
+        }
+
+        const whereCondition = { distributorId };
+
+        // status filter
+        if (status) {
+            whereCondition.status = status;
+        }
+
+        // search
+        if (search) {
+            whereCondition[Op.or] = [
+                { terminalId: { [Op.like]: `%${search}%`, }, },
+                { serialNo: { [Op.like]: `%${search}%`, }, },
+                { campus: { [Op.like]: `%${search}%`, }, },
+            ];
+        }
+
+        const { count, rows } = await Terminal.findAndCountAll({
+            where: whereCondition,
+            include: [
+                { model: Operator, as: "operator", attributes: ["id", "name", "operatorId"], },
+            ],
+            limit,
+            offset,
+            order: [["id", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Terminal list",
+            data: rows,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     createDistributor,
     getAllDistributors,
@@ -479,4 +547,5 @@ module.exports = {
     rechargeDistributorWallet,
     getDistributorWalletTransactions,
     getDistributorDashboardCards,
+    getAllTerminalsByDistributorId
 };

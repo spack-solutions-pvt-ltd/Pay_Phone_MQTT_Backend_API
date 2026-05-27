@@ -88,6 +88,7 @@ const endCallHandler = async (incomingMessage, client) => {
         runnigCall.status = 1;
         runnigCall.min_left = min_left
         runnigCall.endTime = time_stamp
+        runnigCall.end_credits = credits
         runnigCall.creditsUsed = amount
         await runnigCall.save();
 

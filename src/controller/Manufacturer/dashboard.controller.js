@@ -95,6 +95,31 @@ const getDashboardCards = async (req, res, next) => {
 
 };
 
+const getUnavailableTerminals = async (req, res, next) => {
+    try {
+        const unavailableTerminals = await Terminal.findAll({
+            where: {
+                status: {
+                    [Op.ne]: "Active",
+                },
+            },
+            include: [
+                { model: Distributor, as: "distributor", attributes: ["id", "name"] },
+                { model: Operator, as: "operator", attributes: ["id", "name"] }
+            ]
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Unavailable Terminals",
+            data: unavailableTerminals,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getDashboardCards,
+    getUnavailableTerminals
 };

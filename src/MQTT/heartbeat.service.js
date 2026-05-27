@@ -14,7 +14,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const { tid, sim, imei, status } = data;
+        const { tid, sim, imei, status, firmwareVersion } = data;
 
         if (!tid) {
             console.error("[HEARTBEAT] Missing terminal id");
@@ -36,11 +36,15 @@ const heartbeatHandler = async (incomingMessage, client) => {
         }
 
         if (sim && terminal.simNo !== sim) {
-            updates.simNo = sim;
+            console.warn(`SIM number mismatch for terminal ${tid}. Expected: ${terminal.simNo}, Received: ${sim}`);
+            return
         }
 
         if (imei && terminal.imeiNo !== imei) {
             updates.imeiNo = imei;
+        }
+        if (firmwareVersion && terminal.firmwareVersion !== firmwareVersion) {
+            updates.firmwareVersion = firmwareVersion;
         }
 
         updates.lastPingAt = new Date();

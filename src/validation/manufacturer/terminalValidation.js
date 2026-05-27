@@ -4,9 +4,9 @@ const { validationMiddleware } = require("../../middleware/validationMiddleware"
 
 const createTerminalValidation = [
 
-    body("serialNo")
+    body("terminalId")
         .notEmpty()
-        .withMessage("Serial number is required"),
+        .withMessage("terminal Id  is required"),
 
     body("distributorId")
         .notEmpty()
@@ -14,30 +14,13 @@ const createTerminalValidation = [
         .isNumeric()
         .withMessage("Distributor id must be number"),
 
-    body("operatorId")
-        .notEmpty()
-        .withMessage("Operator id is required")
-        .isNumeric()
-        .withMessage("Operator id must be number"),
-
-    body("campus")
-        .notEmpty()
-        .withMessage("Campus is required"),
-
-    body("location")
-        .notEmpty()
-        .withMessage("Location is required"),
-
-    body("firmwareVersion")
-        .notEmpty()
-        .withMessage("Firmware version is required"),
 
     validationMiddleware,
 ];
 
 const updateTerminalValidation = [
 
-    body("serialNo")
+    body("terminalId")
         .optional(),
 
     body("distributorId")
