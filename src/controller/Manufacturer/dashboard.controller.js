@@ -78,25 +78,14 @@ const getDashboardCards = async (req, res, next) => {
             success: true,
             message: "Dashboard cards data",
             data: {
-                distributors: {
-                    total: totalDistributors,
-                    newThisMonth: newDistributorsThisMonth,
-                },
-
-                operators: {
-                    total: totalOperators,
-                    newThisMonth: newOperatorsThisMonth,
-                },
-
-                terminals: {
-                    total: totalTerminals,
-                    newThisWeek: newTerminalsThisWeek,
-                },
-
-                users: {
-                    total: totalUsers,
-                    newThisWeek: newUsersThisWeek,
-                },
+                totalDistributors,
+                newDistributorsThisMonth,
+                totalOperators,
+                newOperatorsThisMonth,
+                totalTerminals,
+                newTerminalsThisWeek,
+                totalUsers,
+                newUsersThisWeek,
             },
         });
 

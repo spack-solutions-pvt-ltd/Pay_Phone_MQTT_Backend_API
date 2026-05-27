@@ -3,7 +3,7 @@ const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay, C
 
 const rfidHandler = async (incomingMessage, client) => {
     try {
-        const { data } = incomingMessage
+        const data = incomingMessage;
 
         if (!data) {
             console.error("Missing data object");
@@ -32,6 +32,11 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!card) {
             console.warn(`RFID Card not found : ${cid}`);
+            return;
+        }
+
+        if (card.status !== "Active") {
+            console.warn(`RFID Card blocked : ${card.id}`);
             return;
         }
 
@@ -127,15 +132,13 @@ const rfidHandler = async (incomingMessage, client) => {
         }
 
         const res = {
-            type: "card_auth_response",
+            type: "CARSP",
             data: {
                 name: user.fullName,
                 credits: Number(userWallet?.balance || 0),
                 card_type: "locked",
-                day_minutes: {
-                    max: Number(user.callDurationLimit),
-                    left: leftMinutes
-                },
+                day_max: Number(user.callDurationLimit),
+                day_left: leftMinutes,
                 numbers: associatedNumbers.map(number => number.phoneNumber),
                 allowed: true,
                 pulse_rate: 60,
@@ -143,7 +146,7 @@ const rfidHandler = async (incomingMessage, client) => {
             }
         }
 
-        client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
+        client.publish(`${terminal.terminalId}`, JSON.stringify(res), (err) => {
             if (err) {
                 console.error('Error message:', err);
             }

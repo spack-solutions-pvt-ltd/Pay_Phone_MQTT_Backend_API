@@ -1,5 +1,5 @@
 
-const { Terminal, User, } = require("../..//models");
+const { Terminal, User, Wallet } = require("../..//models");
 const { Op } = require("sequelize");
 
 const getOperatorDashboardCards = async (req, res, next) => {
@@ -46,19 +46,24 @@ const getOperatorDashboardCards = async (req, res, next) => {
             },
         });
 
+        const wallet = await Wallet.findOne({
+            where: {
+                operatorId,
+                accountType: "Operator",
+            },
+            attributes: ["balance",],
+        });
+
         return res.status(200).json({
             success: true,
             message: "Dashboard cards data",
             data: {
-                totalTerminals: { count: totalTerminals, },
-                activeTerminals: {
-                    count: activeTerminals,
-                    growth: `+${activeTerminalsThisWeek} this week`,
-                },
-                totalUsers: {
-                    count: totalUsers,
-                    growth: `+${usersThisMonth} MTD`,
-                },
+                totalTerminals,
+                activeTerminals,
+                activeTerminalsThisWeek,
+                totalUsers,
+                usersThisMonth,
+                walletBalance: wallet?.balance || 0,
             },
 
         });

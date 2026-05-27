@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 
 
 const sendManufacturerForgotPasswordEmail = async (email, token) => {
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `https://mqttsuperadmin.sseiot.in/auth/reset-password?token=${token}`;
 
     const mailOptions = {
         from: `"Support Team" <${process.env.MAIL_USER}>`,
@@ -127,7 +127,7 @@ const sendManufacturerForgotPasswordEmail = async (email, token) => {
 };
 
 const sendDistributorForgotPasswordEmail = async (email, token) => {
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `https://mqttadmin.sseiot.in/auth/reset-password?token=${token}`;
 
     const mailOptions = {
         from: `"Support Team" <${process.env.MAIL_USER}>`,
@@ -242,7 +242,7 @@ const sendDistributorForgotPasswordEmail = async (email, token) => {
     }
 };
 const sendOperatorForgotPasswordEmail = async (email, token) => {
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const resetLink = `https://mqttuser.sseiot.in/auth/reset-password?token=${token}`;
 
     const mailOptions = {
         from: `"Support Team" <${process.env.MAIL_USER}>`,
@@ -357,13 +357,12 @@ const sendOperatorForgotPasswordEmail = async (email, token) => {
     }
 };
 
-
 const sendDistributorCredentialsEmail = async ({ email, dummyPassword, name }) => {
 
-    const loginUrl = "https://distributor.ss.com";
+    const loginUrl = "https://mqttadmin.sseiot.in ";
 
     const mailOptions = {
-        from: `"Support Team" <${process.env.MAIL_USER}>`,
+        from: `"SSEIOT Support Team" <${process.env.MAIL_USER}>`,
         to: email,
         subject: "Your Distributor Account Credentials",
         html: `
@@ -403,7 +402,7 @@ const sendDistributorCredentialsEmail = async ({ email, dummyPassword, name }) =
                                         font-size:30px;
                                         font-weight:bold;
                                     ">
-                                        Welcome to SS Distributor Portal
+                                        Welcome to SSEIOT Distributor Portal
                                     </h1>
 
                                     <p style="
@@ -571,7 +570,7 @@ const sendDistributorCredentialsEmail = async ({ email, dummyPassword, name }) =
                                         font-size:13px;
                                         color:#9ca3af;
                                     ">
-                                        © ${new Date().getFullYear()} SS Distributor Portal.
+                                        © ${new Date().getFullYear()} SSEIOT Distributor Portal.
                                         All rights reserved.
                                     </p>
 
@@ -598,12 +597,12 @@ const sendDistributorCredentialsEmail = async ({ email, dummyPassword, name }) =
 };
 const sendOperatorCredentialsEmail = async ({ email, password, name }) => {
 
-    const loginUrl = "https://operator.ss.com";
+    const loginUrl = "https://mqttuser.sseiot.in";
 
     const mailOptions = {
-        from: `"SS Support Team" <${process.env.MAIL_USER}>`,
+        from: `"SSEIOT Support Team" <${process.env.MAIL_USER}>`,
         to: email,
-        subject: "Welcome to SS Operator Portal - Your Login Credentials",
+        subject: "Welcome to SSEIOT Operator Portal - Your Login Credentials",
         html: `
         <!DOCTYPE html>
         <html lang="en">
@@ -637,32 +636,11 @@ const sendOperatorCredentialsEmail = async ({ email, password, name }) => {
                             ">
 
                             <!-- Header -->
-                            <tr>
-                                <td align="center"
-                                    style="
-                                        background:linear-gradient(90deg,#0f172a,#1e293b);
-                                        padding:35px 20px;
-                                    ">
-
-                                    <h1 style="
-                                        margin:0;
-                                        color:#ffffff;
-                                        font-size:30px;
-                                        font-weight:bold;
-                                    ">
-                                        SS Operator Portal
-                                    </h1>
-
-                                    <p style="
-                                        margin:10px 0 0;
-                                        color:#cbd5e1;
-                                        font-size:15px;
-                                    ">
-                                        Your operator account has been created successfully.
-                                    </p>
-
+                            <tr> 
+                                <td align="center" style=" background:#020617; padding:45px 25px; border-bottom:1px solid #1e293b; "> <h1 style=" margin:0; color:#ffffff; font-size:32px; font-weight:700; letter-spacing:0.5px; "> SSEIOT </h1> 
+                                    <p style=" margin:12px 0 0; color:#94a3b8; font-size:15px; line-height:1.6; "> Operator Portal Access Credentials </p>
                                 </td>
-                            </tr>
+                             </tr>
 
                             <!-- Body -->
                             <tr>
@@ -682,7 +660,7 @@ const sendOperatorCredentialsEmail = async ({ email, password, name }) => {
                                         color:#4b5563;
                                         margin-bottom:25px;
                                     ">
-                                        Welcome to the SS Operator Portal.
+                                        Welcome to the SSEIOT Operator Portal.
                                         Your account is now active and ready to use.
                                         Please find your login credentials below.
                                     </p>
@@ -828,7 +806,7 @@ const sendOperatorCredentialsEmail = async ({ email, password, name }) => {
                                         font-size:13px;
                                         color:#9ca3af;
                                     ">
-                                        © ${new Date().getFullYear()} SS Operator Portal.
+                                        © ${new Date().getFullYear()} SSEIOT Operator Portal.
                                         All rights reserved.
                                     </p>
 

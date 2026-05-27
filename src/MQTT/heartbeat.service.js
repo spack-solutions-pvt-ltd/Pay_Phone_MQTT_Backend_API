@@ -7,7 +7,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const { data } = incomingMessage;
+        const data = incomingMessage;
 
         if (!data) {
             console.error("[HEARTBEAT] Missing data object");
@@ -48,7 +48,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
 
 
         const response = {
-            type: "heartbeat_ack",
+            type: "PACK",
             time_stamp: Date.now(),
         }
 

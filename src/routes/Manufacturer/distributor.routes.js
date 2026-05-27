@@ -1,13 +1,14 @@
 
 const express = require("express");
 
-const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, rechargeDistributorWallet, getDistributorWalletTransactions, } = require("../../controller/Manufacturer/distributor.controller");
+const { createDistributor, getAllDistributors, getDistributorById, updateDistributor, updateStatusDistributor, rechargeDistributorWallet, getDistributorWalletTransactions, getDistributorDashboardCards, } = require("../../controller/Manufacturer/distributor.controller");
 const { createDistributorValidation, updateDistributorValidation } = require("../../validation/manufacturer/distributorValidation");
 const router = express.Router();
 
 
 router.get("/", getAllDistributors);
 router.get("/wallet-transactions/:distributorId", getDistributorWalletTransactions);
+router.get("/dashboard-cards/:distributorId", getDistributorDashboardCards);
 router.get("/:id", getDistributorById);
 router.post("/", createDistributorValidation, createDistributor);
 router.put("/:id", updateDistributorValidation, updateDistributor);

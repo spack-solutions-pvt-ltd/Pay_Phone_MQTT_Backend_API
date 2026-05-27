@@ -2,7 +2,7 @@ const { Terminal } = require('../models')
 
 const blockTerminalHandler = async (incomingMessage) => {
     try {
-        const { tid } = incomingMessage.data
+        const { tid } = incomingMessage
 
         const terminal = await Terminal.findOne({
             where: { terminalId: tid },

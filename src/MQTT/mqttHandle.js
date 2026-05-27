@@ -26,35 +26,41 @@ client.on('connect', () => {
 })
 
 client.on('message', function (topic, message, packet, done,) {
-    console.log("sseiot message",  message.toString())
-    const incomingMessage = JSON.parse(message.toString());
+    let incomingMessage;
+    try {
+        console.log("sseiot message", message.toString())
+        incomingMessage = JSON.parse(message.toString());
+    } catch (err) {
+        console.error("Invalid JSON:", message.toString());
+        return; // stop only this message
+    }
 
     if (!topic === 'sseiot') {
         console.log("This is Other topic please check", topic)
     }
 
     switch (incomingMessage.type) {
-        case "heartbeat":
+        case "PING":
             heartbeatHandler(incomingMessage, client);
             break;
 
-        case "card_auth_request":
+        case "CARQ":
             rfidHandler(incomingMessage, client);
             break;
 
-        case "call_start":
+        case "CSTAT":
             callStartHandler(incomingMessage, client);
             break;
 
-        case "call_end":
+        case "CEND":
             endCallHandler(incomingMessage, client);
             break;
 
-        case "termina_blocked":
+        case "CUPD":
             blockTerminalHandler(incomingMessage);
             break;
 
-        case "termina_released":
+        case "CUPDACK":
             unblockTerminalHandler(incomingMessage);
             break;
 

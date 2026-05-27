@@ -4,7 +4,7 @@ const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog } = require("../
 
 const endCallHandler = async (incomingMessage, client) => {
     try {
-        const { data } = incomingMessage;
+        const data = incomingMessage;
 
         if (!data) {
             console.error("Missing data object");
@@ -92,7 +92,7 @@ const endCallHandler = async (incomingMessage, client) => {
         await runnigCall.save();
 
         const response = {
-            type: "card_end_ack",
+            type: "CENDACK",
             time_stamp: Date.now(),
         }
 

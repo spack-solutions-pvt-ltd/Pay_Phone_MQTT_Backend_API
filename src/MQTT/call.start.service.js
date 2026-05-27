@@ -3,7 +3,7 @@ const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog } = require('../
 const callStartHandler = async (incomingMessage, client) => {
     try {
 
-        const { data } = incomingMessage;
+        const data = incomingMessage;
 
         if (!data) {
             console.error("Missing data object");
@@ -53,7 +53,7 @@ const callStartHandler = async (incomingMessage, client) => {
         })
 
         const response = {
-            type: "card_connect_ack",
+            type: "CSTATACK",
             time_stamp: Date.now(),
         }
 

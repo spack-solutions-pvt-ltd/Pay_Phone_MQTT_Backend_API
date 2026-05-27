@@ -33,7 +33,10 @@ const corsList = [
     'http://localhost:5174',
     'http://localhost:5175',
     'http://localhost:5176',
-    "https://dwfv0x63-5174.inc1.devtunnels.ms"
+    "https://dwfv0x63-5174.inc1.devtunnels.ms",
+    "https://mqttsuperadmin.sseiot.in",
+    "https://mqttadmin.sseiot.in",
+    "https://mqttuser.sseiot.in"
 ];
 
 // Enable CORS
@@ -113,15 +116,15 @@ startServer();
 
 
 //   Unhandled Rejection
-process.on("unhandledRejection", (err) => {
-    console.error("UNHANDLED REJECTION! 💥", err);
-    process.exit(1);
-});
+// process.on("unhandledRejection", (err) => {
+//     console.error("UNHANDLED REJECTION! 💥", err);
+//     process.exit(1);
+// });
 
-//  Uncaught Exception
+// //  Uncaught Exception
 
 
-process.on("uncaughtException", (err) => {
-    console.error("UNCAUGHT EXCEPTION! 💥", err);
-    process.exit(1);
-});
+// process.on("uncaughtException", (err) => {
+//     console.error("UNCAUGHT EXCEPTION! 💥", err);
+//     process.exit(1);
+// });

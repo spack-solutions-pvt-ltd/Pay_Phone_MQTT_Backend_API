@@ -1,4 +1,4 @@
-const { Distributor, Wallet, WalletTransaction, sequelize, Operator } = require("../../models");
+const { Distributor, Wallet, WalletTransaction, sequelize, Operator, Terminal, User } = require("../../models");
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
 const { sendDistributorCredentialsEmail, } = require("../../service/mailService");
@@ -434,6 +434,42 @@ const getDistributorWalletTransactions = async (req, res, next) => {
     }
 };
 
+const getDistributorDashboardCards = async (req, res, next) => {
+    try {
+
+        const distributorId = req.params.distributorId;
+
+        const totalOperators = await Operator.count({
+            where: { distributorId, },
+        });
+
+        const terminalCount = await Terminal.count({
+            where: { distributorId, },
+        });
+        const allOperators = await Operator.findAll({
+            where: { distributorId, },
+            attributes: ["id"],
+        });
+
+        const totalUsers = await User.count({
+            where: { operatorId: allOperators.map((operator) => operator.id), },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Dashboard cards data",
+            data: {
+                totalOperators,
+                terminalCount,
+                totalUsers,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     createDistributor,
     getAllDistributors,
@@ -442,4 +478,5 @@ module.exports = {
     updateStatusDistributor,
     rechargeDistributorWallet,
     getDistributorWalletTransactions,
+    getDistributorDashboardCards,
 };
