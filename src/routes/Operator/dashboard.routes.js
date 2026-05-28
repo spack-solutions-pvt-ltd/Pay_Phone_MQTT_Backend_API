@@ -1,9 +1,10 @@
 const express = require("express");
-const { getOperatorDashboardCards } = require("../../controller/Operator/dashboard.controller");
+const { getOperatorDashboardCards, getUnavailableTerminals } = require("../../controller/Operator/dashboard.controller");
 
 const router = express.Router();
 
 router.get("/cards", getOperatorDashboardCards);
+router.get("/unavailable-terminals", getUnavailableTerminals);
 
 /**
  * @swagger
