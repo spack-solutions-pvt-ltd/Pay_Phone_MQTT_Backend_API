@@ -1,5 +1,5 @@
 
-const { Terminal, User, Wallet } = require("../..//models");
+const { Terminal, User, Wallet, } = require("../..//models");
 const { Op } = require("sequelize");
 
 const getOperatorDashboardCards = async (req, res, next) => {
@@ -81,9 +81,6 @@ const getUnavailableTerminals = async (req, res, next) => {
                 operatorId,
                 status: { [Op.ne]: "Active", },
             },
-            include: [
-                { model: Operator, as: "operator", attributes: ["id", "name"] }
-            ]
         });
 
         return res.status(200).json({
