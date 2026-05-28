@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const { Terminal, Distributor, Operator } = require("../../models");
-const { unblockTerminal } = require("../../MQTT/mqttHandle");
+const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
 
 const createTerminal = async (req, res, next) => {
 
@@ -15,7 +15,7 @@ const createTerminal = async (req, res, next) => {
         if (existingTerminal) {
             return res.status(400).json({
                 success: false,
-                message: "Serial number already exists",
+                message: "Terminal Id already exists",
             });
         }
 
@@ -146,6 +146,20 @@ const updateTerminal = async (req, res, next) => {
             });
         }
 
+        const existingTerminal = await Terminal.findOne({
+            where: {
+                terminalId: req.body.terminalId,
+                id: { [Op.ne]: terminal.id },
+            },
+            attributes: ["id", "terminalId",],
+        });
+
+        if (existingTerminal) {
+            return res.status(400).json({
+                success: false,
+                message: "Terminal Id already exists",
+            });
+        }
         await terminal.update(req.body);
 
         return res.status(200).json({
@@ -182,7 +196,7 @@ const statusUpdateTerminal = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: `Terminal Request to ${status} successfully`,
+            message: `Terminal Request to ${status}`,
             data: terminal,
         });
 
@@ -275,5 +289,6 @@ module.exports = {
     getAllTerminals,
     getTerminalById,
     updateTerminal,
-    statusUpdateTerminal
+    statusUpdateTerminal,
+    bulkCreateTerminal,
 };

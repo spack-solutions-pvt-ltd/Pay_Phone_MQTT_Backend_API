@@ -27,13 +27,11 @@ app.use(hpp());
 
 
 const corsList = [
-    'http://localhost:5001',
-    'http://localhost:5000',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
     'http://localhost:5176',
-    "https://dwfv0x63-5174.inc1.devtunnels.ms",
+
     "https://mqttsuperadmin.sseiot.in",
     "https://mqttadmin.sseiot.in",
     "https://mqttuser.sseiot.in"

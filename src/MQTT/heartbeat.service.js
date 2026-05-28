@@ -14,7 +14,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
             return;
         }
 
-        const { tid, sim, imei, status, firmwareVersion } = data;
+        const { tid, sim, imei, status, firmwareVersion, sstr } = data;
 
         if (!tid) {
             console.error("[HEARTBEAT] Missing terminal id");
@@ -31,13 +31,39 @@ const heartbeatHandler = async (incomingMessage, client) => {
         }
         const updates = {};
 
+        if (terminal.status == "Blocked") {
+            console.warn(`Terminal is blocked : ${tid}`);
+
+            const request = {
+                type: "PINGACK",
+                allowed: false
+            }
+
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            },);
+        }
+
         if (terminal.status !== "Active") {
             updates.status = "Active";
         }
 
         if (sim && terminal.simNo !== sim) {
             console.warn(`SIM number mismatch for terminal ${tid}. Expected: ${terminal.simNo}, Received: ${sim}`);
-            return
+
+            const request = {
+                type: "TCMD",
+                tid: terminal.terminalId,
+                allowed: false
+            }
+
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            },);
         }
 
         if (imei && terminal.imeiNo !== imei) {
@@ -46,14 +72,17 @@ const heartbeatHandler = async (incomingMessage, client) => {
         if (firmwareVersion && terminal.firmwareVersion !== firmwareVersion) {
             updates.firmwareVersion = firmwareVersion;
         }
+        if (sstr && terminal.sstr !== sstr) {
+            updates.sstr = sstr;
+        }
 
         updates.lastPingAt = new Date();
         await terminal.update(updates);
 
 
         const response = {
-            type: "PACK",
-            time_stamp: Date.now(),
+            type: "PINGACK",
+            allowed: true
         }
 
         return client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {

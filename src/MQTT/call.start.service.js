@@ -1,4 +1,4 @@
-const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog } = require('../models');
+const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet } = require('../models');
 
 const callStartHandler = async (incomingMessage, client) => {
     try {
@@ -41,17 +41,26 @@ const callStartHandler = async (incomingMessage, client) => {
             attributes: ["id"]
         });
 
+        const userWallet = await Wallet.findOne({
+            where: { userId: card.userId, accountType: "User" }
+        });
+
+
         await CallLog.create({
             callerId: `Cl${Date.now()}`,
             userId: card.userId,
             terminalId: terminal.id,
             phoneNumber: number,
-            startTime: time_stamp,
+            startTime: time_stamp || Date.now(),
             associatedNumberId: associatedNumber.id,
             rfidCardId: card.id,
             min_left: min_left,
-            start_credits: credits,
+            start_credits: userWallet.balance,
+            end_credits: credits,
+            status: false
         })
+
+        await userWallet.update({ balance: credits })
 
         const response = {
             type: "CSTATACK",

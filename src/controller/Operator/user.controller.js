@@ -178,11 +178,38 @@ const updateUser = async (req, res, next) => {
         // update associated numbers
         if (associatedNumbers) {
 
-            await UserAssociatedNumber.destroy({ where: { userId: user.id }, transaction, });
+            // existing numbers
+            const existingNumbers = await UserAssociatedNumber.findAll({
+                where: { userId: user.id },
+                transaction,
+            });
 
-            const numbers = associatedNumbers.map((number) => ({ userId: user.id, phoneNumber: number }));
+            const existingPhoneNumbers = existingNumbers.map(n => n.phoneNumber);
 
-            await UserAssociatedNumber.bulkCreate(numbers, { transaction, });
+            // incoming numbers
+            const incomingNumbers = associatedNumbers;
+
+            // numbers to add
+            const numbersToAdd = incomingNumbers.filter(
+                number => !existingPhoneNumbers.includes(number)
+            );
+
+            // numbers to remove
+            const numbersToRemove = existingNumbers.filter(
+                n => !incomingNumbers.includes(n.phoneNumber)
+            );
+
+            // add new numbers
+            if (numbersToAdd.length > 0) {
+                const newNumbers = numbersToAdd.map(number => ({
+                    userId: user.id,
+                    phoneNumber: number,
+                }));
+
+                await UserAssociatedNumber.bulkCreate(newNumbers, {
+                    transaction,
+                });
+            }
         }
 
         // update active days

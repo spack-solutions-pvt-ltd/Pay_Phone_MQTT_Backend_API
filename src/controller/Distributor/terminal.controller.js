@@ -139,6 +139,21 @@ const updateDistributorTerminal = async (req, res, next) => {
             });
         }
 
+        const existingTerminal = await Terminal.findOne({
+            where: {
+                terminalId: req.body.terminalId,
+                id: { [Op.ne]: terminal.id },
+            },
+            attributes: ["id", "terminalId",],
+        });
+
+        if (existingTerminal) {
+            return res.status(400).json({
+                success: false,
+                message: "Terminal Id already exists",
+            });
+        }
+
         await terminal.update(req.body);
 
         return res.status(200).json({
@@ -175,7 +190,7 @@ const statusUpdateDistributorTerminal = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: `Terminal Request to ${status} successfully`,
+            message: `Terminal Request to ${status}`,
             data: terminal,
         });
 

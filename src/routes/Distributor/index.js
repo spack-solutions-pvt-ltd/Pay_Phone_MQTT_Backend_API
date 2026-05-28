@@ -5,11 +5,13 @@ const operatorRoutes = require("./operator.routes");
 const { distributorAuthMiddleware } = require("../../middleware/distributor/distributorAuthMiddleware");
 const terminalRoutes = require("./terminal.routes");
 const walletTransactionRoutes = require("./wallet.transaction.routes");
+const dashboardRoutes = require("./dashboard.routes");
 
 
 router.use("/auth", authRoutes);
 router.use("/operator", distributorAuthMiddleware, operatorRoutes);
 router.use("/terminal", distributorAuthMiddleware, terminalRoutes);
 router.use("/wallet-transactions", distributorAuthMiddleware, walletTransactionRoutes);
+router.use("/dashboard", distributorAuthMiddleware, dashboardRoutes);
 
 module.exports = router;

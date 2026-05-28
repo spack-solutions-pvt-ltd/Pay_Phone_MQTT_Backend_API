@@ -2,11 +2,11 @@
 const mqtt = require('mqtt')
 const { heartbeatHandler } = require('./heartbeat.service')
 const { Op } = require('sequelize')
-const { Terminal } = require('../models')
+const { Terminal, CallLog } = require('../models')
 const { rfidHandler } = require('./Rfid.service')
 const { endCallHandler } = require('./end.call.service')
 const { callStartHandler } = require('./call.start.service')
-const { blockTerminalHandler, unblockTerminalHandler } = require('./terminal.service')
+const { TerminalHandler } = require('./terminal.service')
 const { runningCallHandler } = require('./running.call.service')
 
 const mqttPort = process.env.MQTT_PORT
@@ -61,12 +61,8 @@ client.on('message', function (topic, message, packet, done,) {
             endCallHandler(incomingMessage, client);
             break;
 
-        case "termina_block":
-            blockTerminalHandler(incomingMessage);
-            break;
-
-        case "termina_release":
-            unblockTerminalHandler(incomingMessage);
+        case "TCMDACK":
+            TerminalHandler(incomingMessage);
             break;
 
         default:
@@ -77,7 +73,7 @@ client.on('message', function (topic, message, packet, done,) {
 client.subscribe('sseiot');
 
 client.on('error', function (error) {
-    console.log(error);
+    console.log(error?.message);
 });
 
 client.on('disconnect', () => {
@@ -93,10 +89,9 @@ client.on('offline', (res) => {
 const blockTerminal = async (terminalId) => {
     try {
         const request = {
-            type: "termina_block",
-            data: {
-                tid: terminalId
-            }
+            type: "TCMD",
+            tid: terminalId,
+            allowed: false
         }
         client.publish(terminalId, JSON.stringify(request), (err) => {
             if (err) {
@@ -112,10 +107,9 @@ const blockTerminal = async (terminalId) => {
 const unblockTerminal = async (terminalId) => {
     try {
         const request = {
-            type: "termina_release",
-            data: {
-                tid: terminalId
-            }
+            type: "TCMD",
+            tid: terminalId,
+            allowed: true
         }
 
         client.publish(terminalId, JSON.stringify(request), (err) => {
@@ -127,6 +121,21 @@ const unblockTerminal = async (terminalId) => {
         console.error("Block Terminal Error :", error);
     }
 }
+
+// Check Not Closed Calls
+const checkNotClosedCalls = async () => {
+    try {
+        const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
+
+        const [updatedCount] = await CallLog.update(
+            { status: 1 },
+            { where: { status: 0, updatedAt: { [Op.lt]: threeMinutesAgo } } }
+        );
+
+    } catch (error) {
+        console.error("Inactive Check Error :", error);
+    }
+};
 
 // Inactive if not come the heartbeat message
 const checkInactiveTerminals = async () => {
@@ -146,6 +155,8 @@ const checkInactiveTerminals = async () => {
 // Run Every 1 Minute
 setInterval(checkInactiveTerminals, 60 * 1000);
 
+// Run Every 2 Minute
+setInterval(checkNotClosedCalls, 2 * 60 * 1000);
 
 // publish message 
 // setInterval(() => {

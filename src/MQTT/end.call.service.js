@@ -1,4 +1,4 @@
-const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog } = require("../models");
+const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet, WalletTransaction } = require("../models");
 
 
 
@@ -71,7 +71,7 @@ const endCallHandler = async (incomingMessage, client) => {
             console.warn(`User wallet not found : ${user.id}`);
             return;
         }
-        const amount = Number(userWallet.balance) - Number(credits);
+        const amount = Number(runnigCall.start_credits) - Number(credits);
 
         await userWallet.update({ balance: credits });
 
@@ -84,10 +84,10 @@ const endCallHandler = async (incomingMessage, client) => {
             transactionType: "DEDUCT_FUNDS",
         });
 
-        runnigCall.duration = time_stamp - runnigCall.startTime
+        runnigCall.duration = (time_stamp || Date.now()) - runnigCall.startTime
         runnigCall.status = 1;
         runnigCall.min_left = min_left
-        runnigCall.endTime = time_stamp
+        runnigCall.endTime = time_stamp || Date.now()
         runnigCall.end_credits = credits
         runnigCall.creditsUsed = amount
         await runnigCall.save();

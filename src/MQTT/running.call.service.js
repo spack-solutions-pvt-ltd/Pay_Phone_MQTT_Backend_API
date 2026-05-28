@@ -1,4 +1,4 @@
-const { User, Wallet, CallLog } = require('../models');
+const { User, Wallet, CallLog, Terminal } = require('../models');
 
 const runningCallHandler = async (incomingMessage, client) => {
     try {
@@ -16,18 +16,22 @@ const runningCallHandler = async (incomingMessage, client) => {
         }
 
         const callLog = await CallLog.findOne({
-            where: { phoneNumber: number, status: false, terminalId: terminal.id },
+            where: {
+                phoneNumber: number,
+                status: false,
+                terminalId: terminal.id
+            },
         });
+
+        if (!callLog) {
+            console.warn(`Call log not found : ${number}`);
+            return;
+        }
 
         const user = await User.findOne({
             where: { id: callLog.userId },
-            attributes: ["id", , "userId"]
+            attributes: ["id", "userId"]
         });
-
-        if (!user) {
-            console.warn(`User not found : ${callLog.userId}`);
-            return;
-        }
 
         const wallet = await Wallet.findOne({
             where: { userId: user.id, accountType: "User" },

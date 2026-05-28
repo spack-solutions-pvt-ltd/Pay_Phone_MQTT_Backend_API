@@ -97,6 +97,7 @@ const getAllOperators = async (req, res, next) => {
                 { companyName: { [Op.like]: `%${search}%`, }, },
                 { gstNumber: { [Op.like]: `%${search}%`, }, },
                 { location: { [Op.like]: `%${search}%`, }, },
+                { operatorId: { [Op.like]: `%${search}%`, }, },
             ];
 
         }

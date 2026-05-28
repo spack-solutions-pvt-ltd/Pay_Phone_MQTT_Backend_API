@@ -95,6 +95,7 @@ const getAllDistributors = async (req, res, next) => {
                 { email: { [Op.like]: `%${search}%`, }, },
                 { companyName: { [Op.like]: `%${search}%`, }, },
                 { phone: { [Op.like]: `%${search}%`, }, },
+                { distributorId: { [Op.like]: `%${search}%`, }, },
             ];
 
         }

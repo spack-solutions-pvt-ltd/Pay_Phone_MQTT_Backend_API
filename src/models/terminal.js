@@ -57,7 +57,8 @@ module.exports = (sequelize, DataTypes) => {
         "Blocked"
       ),
       defaultValue: "Inactive"
-    }
+    },
+    sstr: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Terminal',

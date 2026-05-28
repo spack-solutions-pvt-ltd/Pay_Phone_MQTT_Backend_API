@@ -1,16 +1,18 @@
 
 const express = require("express");
 const { createTerminalValidation, updateTerminalValidation } = require("../../validation/manufacturer/terminalValidation");
-const { createTerminal, getAllTerminals, getTerminalById, updateTerminal, statusUpdateTerminal } = require("../../controller/Manufacturer/terminal.controller");
+const { createTerminal, getAllTerminals, getTerminalById, updateTerminal, statusUpdateTerminal, bulkCreateTerminal } = require("../../controller/Manufacturer/terminal.controller");
 
 const router = express.Router();
 
 
 router.get("/", getAllTerminals);
 router.get("/:id", getTerminalById);
+router.post("/bulk", bulkCreateTerminal);
 router.post("/", createTerminalValidation, createTerminal);
 router.put("/:id", updateTerminalValidation, updateTerminal);
 router.patch("/:id", statusUpdateTerminal);
+
 
 /**
  * @swagger
