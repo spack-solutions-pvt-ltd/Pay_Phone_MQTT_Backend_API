@@ -71,23 +71,29 @@ const endCallHandler = async (incomingMessage, client) => {
             console.warn(`User wallet not found : ${user.id}`);
             return;
         }
+
         const amount = Number(runnigCall.start_credits) - Number(credits);
 
         await userWallet.update({ balance: credits });
 
         await WalletTransaction.create({
-            transactionId: `UCTX${Date.now()}`,
             walletId: userWallet.id,
+            transactionId: `UCTX${Date.now()}`,
             amount: amount,
             type: "Debit",
             remainingBalance: credits,
             transactionType: "DEDUCT_FUNDS",
         });
 
-        runnigCall.duration = (time_stamp || Date.now()) - runnigCall.startTime
+        const endTime = time_stamp || Date.now();
+
+        // duration in seconds
+        const duration = Math.floor((endTime - new Date(runnigCall.startTime)) / 1000);
+
+        runnigCall.duration = duration
         runnigCall.status = 1;
         runnigCall.min_left = min_left
-        runnigCall.endTime = time_stamp || Date.now()
+        runnigCall.endTime = endTime
         runnigCall.end_credits = credits
         runnigCall.creditsUsed = amount
         await runnigCall.save();

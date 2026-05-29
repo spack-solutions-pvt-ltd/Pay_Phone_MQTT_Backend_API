@@ -2,7 +2,7 @@ const { User, Wallet, CallLog, Terminal } = require('../models');
 
 const runningCallHandler = async (incomingMessage, client) => {
     try {
-        const { tid, cid, credits, min_left, number } = incomingMessage;
+        const { tid, cid, credits, min_left, number, time_stamp } = incomingMessage;
 
 
         const terminal = await Terminal.findOne({
@@ -42,9 +42,15 @@ const runningCallHandler = async (incomingMessage, client) => {
             return;
         }
 
+        const endTime = time_stamp || Date.now();
+
+        const duration = Math.floor((endTime - new Date(runnigCall.startTime)) / 1000);
+
+        callLog.duration = duration
         callLog.min_left = min_left;
         callLog.end_credits = credits;
         callLog.creditsUsed = callLog.start_credits - credits;
+        callLog.endTime = endTime
         await callLog.save()
 
         wallet.balance = credits;
