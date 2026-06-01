@@ -325,7 +325,7 @@ const rechargeDistributorWallet = async (req, res, next) => {
             amount,
             type,
             remainingBalance: updatedBalance,
-            transactionType: type === "Credit" ? "MANUFACTURER_CREDIT" : "MANUFACTURER_DEBIT",
+            transactionType: type === "Credit" ? "ADD_FUNDS" : "DEDUCT_FUNDS",
             paymentMode: paymentMode || "Manufacturer Recharge",
         }, { transaction, });
 
