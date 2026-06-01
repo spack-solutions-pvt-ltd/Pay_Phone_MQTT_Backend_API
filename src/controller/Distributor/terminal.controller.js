@@ -1,39 +1,48 @@
 const { Op } = require("sequelize");
-const { Terminal } = require("../../models");
+const { Terminal, Operator } = require("../../models");
 const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
 
 const createDistributorTerminal = async (req, res, next) => {
     try {
         const distributorId = req.distributor.id;
 
-        const { terminalId, operatorId, campus, location, } = req.body;
+        const { terminalId, operatorId, simNo, location, } = req.body;
 
         const existingTerminal = await Terminal.findOne({
-            where: { terminalId, },
-            attributes: ["id", "terminalId",],
+            where: { id: terminalId, distributorId },
+            attributes: ["id", "terminalId"],
         });
 
-        if (existingTerminal) {
+
+        if (!existingTerminal) {
             return res.status(400).json({
                 success: false,
-                message: "Serial number already exists",
+                message: "Terminal Id not found",
             });
         }
 
-        const terminalCount = await Terminal.count();
-
-        const terminal = await Terminal.create({
-            terminalId: terminalId,
-            distributorId,
-            operatorId,
-            campus,
-            location,
+        const operator = await Operator.findByPk(operatorId, {
+            attributes: ["id", "name", "operatorId"],
         });
+
+        if (!operator) {
+            return res.status(400).json({
+                success: false,
+                message: "Operator not found",
+            });
+        }
+
+        await existingTerminal.update({
+            operatorId,
+            location,
+            simNo,
+        });
+
 
         return res.status(201).json({
             success: true,
-            message: "Terminal created successfully",
-            data: terminal,
+            message: "Terminal updated successfully",
+            data: existingTerminal,
         });
 
     } catch (error) {
@@ -80,6 +89,9 @@ const getAllDistributorTerminals = async (req, res, next) => {
 
         const { count, rows } = await Terminal.findAndCountAll({
             where: whereCondition,
+            include: [
+                { model: Operator, as: "operator", attributes: ["id", "name", "operatorId"], },
+            ],
             limit,
             offset,
             order: [["id", "DESC"]],
@@ -199,10 +211,32 @@ const statusUpdateDistributorTerminal = async (req, res, next) => {
     }
 }
 
+const getAllNonAssociatedTerminals = async (req, res, next) => {
+    try {
+        const distributorId = req.distributor.id;
+
+        const nonAssociatedTerminals = await Terminal.findAll({
+            where: {
+                distributorId,
+                operatorId: null,
+            },
+            attributes: ["id", "terminalId",],
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Non associated terminal list",
+            data: nonAssociatedTerminals,
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     createDistributorTerminal,
     getAllDistributorTerminals,
     getDistributorTerminalById,
     updateDistributorTerminal,
     statusUpdateDistributorTerminal,
+    getAllNonAssociatedTerminals
 };

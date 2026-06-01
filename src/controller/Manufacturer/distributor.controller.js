@@ -122,6 +122,9 @@ const getAllDistributors = async (req, res, next) => {
             attributes: {
                 exclude: ["password"],
             },
+            include: [
+                { model: Wallet, as: "wallet", attributes: ["balance", "id"], },
+            ],
             limit,
             offset,
             order: [["id", "DESC"]],

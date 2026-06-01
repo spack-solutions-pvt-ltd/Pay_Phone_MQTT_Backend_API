@@ -22,10 +22,6 @@ const createOperatorValidation = [
         .notEmpty()
         .withMessage("Company name is required"),
 
-    body("gstNumber")
-        .notEmpty()
-        .withMessage("GST number is required"),
-
     body("location")
         .notEmpty()
         .withMessage("Location is required"),

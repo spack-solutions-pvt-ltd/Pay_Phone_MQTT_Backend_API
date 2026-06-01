@@ -1,12 +1,13 @@
 
 const express = require("express");
-const { getAllDistributorTerminals, getDistributorTerminalById, createDistributorTerminal, updateDistributorTerminal, statusUpdateDistributorTerminal } = require("../../controller/Distributor/terminal.controller");
+const { getAllDistributorTerminals, getDistributorTerminalById, createDistributorTerminal, updateDistributorTerminal, statusUpdateDistributorTerminal, getAllNonAssociatedTerminals } = require("../../controller/Distributor/terminal.controller");
 const { updateTerminalValidation, createTerminalValidation } = require("../../validation/distributor/terminalValidation");
 
 const router = express.Router();
 
 
 router.get("/", getAllDistributorTerminals);
+router.get("/non-associated", getAllNonAssociatedTerminals);
 router.get("/:id", getDistributorTerminalById);
 router.post("/", createTerminalValidation, createDistributorTerminal);
 router.put("/:id", updateTerminalValidation, updateDistributorTerminal);

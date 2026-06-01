@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.ENUM(
         "Active",
         "Inactive",
-        "Disconnected",
+        "Offline",
         "Faulted",
         "Blocked"
       ),

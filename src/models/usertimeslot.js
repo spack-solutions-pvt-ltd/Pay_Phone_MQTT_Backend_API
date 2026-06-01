@@ -3,7 +3,7 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class UserAssociatedNumber extends Model {
+  class UserTimeSlot extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -15,19 +15,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "user"
       })
-      
-      // this.hasMany(models.CallLog, {
-      //   foreignKey: "associatedNumberId",
-      //   as: "callLogs"
-      // })
     }
   }
-  UserAssociatedNumber.init({
+  UserTimeSlot.init({
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: DataTypes.BIGINT
+    },
     userId: DataTypes.BIGINT,
-    phoneNumber: DataTypes.STRING
+    startTime: DataTypes.TIME,
+    endTime: DataTypes.TIME,
+    status: DataTypes.BOOLEAN
   }, {
     sequelize,
-    modelName: 'UserAssociatedNumber',
+    modelName: 'UserTimeSlot',
   });
-  return UserAssociatedNumber;
+  return UserTimeSlot;
 };

@@ -70,7 +70,7 @@ client.on('message', function (topic, message, packet, done,) {
     }
 });
 
-client.subscribe('sseiot');
+// client.subscribe('sseiot');
 
 client.on('error', function (error) {
     console.log(error?.message);
@@ -143,7 +143,7 @@ const checkInactiveTerminals = async () => {
         const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
 
         const [updatedCount] = await Terminal.update(
-            { status: "Disconnected" },
+            { status: "Offline" },
             { where: { status: "Active", lastPingAt: { [Op.lt]: threeMinutesAgo } } }
         );
 

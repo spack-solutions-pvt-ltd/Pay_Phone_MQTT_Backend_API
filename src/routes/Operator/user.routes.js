@@ -1,6 +1,6 @@
 
 const express = require("express");
-const { getAllUsers, getUserById, createUser, updateUser, getAllRfidCardsByUserId, userWalletTransaction, userCallLogsList } = require("../../controller/Operator/user.controller");
+const { getAllUsers, getUserById, createUser, updateUser, getAllRfidCardsByUserId, userWalletTransaction, userCallLogsList, suggestDuplicatePhoneNumbers } = require("../../controller/Operator/user.controller");
 const { createUserValidation, updateUserValidation } = require("../../validation/operator/userValidation");
 
 const router = express.Router();
@@ -10,8 +10,10 @@ router.get("/:id", getUserById);
 router.get("/:id/rfid-cards", getAllRfidCardsByUserId);
 router.get("/:id/wallet-transactions", userWalletTransaction);
 router.get("/:id/call-logs", userCallLogsList);
+router.get("/duplicate-numbers", suggestDuplicatePhoneNumbers);
 router.post("/", createUserValidation, createUser);
 router.put("/:id", updateUserValidation, updateUser);
+
 
 
 /**

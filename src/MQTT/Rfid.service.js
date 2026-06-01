@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay,
-    CallLog, Operator, Wallet } = require('../models');
+    CallLog, Operator, Wallet, UserTimeSlot } = require('../models');
 const moment = require('moment-timezone');
 
 const rfidHandler = async (incomingMessage, client) => {
@@ -18,10 +18,18 @@ const rfidHandler = async (incomingMessage, client) => {
             where: { terminalId: tid },
             attributes: ["id", "operatorId", "terminalId"]
         });
+        const notAllowedResponse = {
+            type: "CARSP",
+            allowed: false
+        }
 
         if (!terminal) {
             console.warn(`Terminal not found : ${tid}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
         const operator = await Operator.findOne({
             where: { id: terminal.operatorId },
@@ -34,12 +42,20 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!card) {
             console.warn(`RFID Card not found : ${cid}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         if (card.status !== "Active") {
             console.warn(`RFID Card blocked : ${card.id}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         const user = await User.findOne({
@@ -48,17 +64,29 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!user) {
             console.warn(`User not found : ${card.userId}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         if (user.status == "Blocked") {
             console.warn(` User blocked : ${card.userId}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         if (user.operatorId != terminal.operatorId) {
             console.warn(`User operator mismatch : ${card.userId}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         const userWallet = await Wallet.findOne({
@@ -67,7 +95,11 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (userWallet.balance <= 0) {
             console.warn(`User wallet balance not enough : ${user.id}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         const associatedNumber = await UserAssociatedNumber.findAll({
@@ -75,9 +107,13 @@ const rfidHandler = async (incomingMessage, client) => {
             attributes: ["phoneNumber", "id"]
         });
 
-        if (!associatedNumber) {
+        if (associatedNumber.length === 0) {
             console.warn(`Associated number not found : ${user.id}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
 
@@ -93,22 +129,51 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!activeDaysData) {
             console.warn(` User active days not found : ${user.id}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            });
         }
 
         const activeDays = activeDaysData.map(day => day.day);
 
         if (!activeDays.includes(today)) {
             console.warn(`User inactive today : ${user.id}`);
-            return
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            });
         }
 
+
+        const timeSlot = await UserTimeSlot.findOne({
+            where: {
+                userId: user.id,
+                startTime: { [Op.lte]: currentTime },
+                endTime: { [Op.gte]: currentTime }
+            }
+        })
 
         // Active Time Validation
-        if (user.activeFrom && user.activeTo && (currentTime < user.activeFrom || currentTime > user.activeTo)) {
+        if (!timeSlot) {
             console.warn(`User inactive at this time : ${user.id}`);
-            return;
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            });
         }
+
+        // if (user.activeFrom && user.activeTo && (currentTime < user.activeFrom || currentTime > user.activeTo)) {
+        //     console.warn(`User inactive at this time : ${user.id}`);
+        //     return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+        //         if (err) {
+        //             console.error('Error message:', err);
+        //         }
+        //     });
+        // }
 
 
         // Today Call Usage
@@ -130,7 +195,11 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (leftMinutes <= 0) {
             console.warn(`Daily limit exceeded : ${user.id}`);
-            return
+            return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
+                if (err) {
+                    console.error('Error message:', err);
+                }
+            })
         }
 
         const res = {

@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "Spack@123",
+    "password": null,
     "database": "Pay_Phone_MQTT_DB",
     "host": "127.0.0.1",
     "dialect": "mysql"

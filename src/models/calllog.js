@@ -20,10 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "terminalId",
         as: "terminal"
       })
-      this.belongsTo(models.UserAssociatedNumber, {
-        foreignKey: "associatedNumberId",
-        as: "associatedNumbers"
-      })
+      // this.belongsTo(models.UserAssociatedNumber, {
+      //   foreignKey: "associatedNumberId",
+      //   as: "associatedNumbers"
+      // })
 
     }
   }
@@ -31,7 +31,6 @@ module.exports = (sequelize, DataTypes) => {
     callerId: DataTypes.STRING,
     userId: DataTypes.BIGINT,
     terminalId: DataTypes.BIGINT,
-    associatedNumberId: DataTypes.BIGINT,
     phoneNumber: DataTypes.STRING,
     startTime: DataTypes.DATE,
     endTime: DataTypes.DATE,

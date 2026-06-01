@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
-const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog, WalletTransaction } = require("../../models");
+const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog, WalletTransaction,
+    UserTimeSlot } = require("../../models");
 
 
 
@@ -89,9 +90,22 @@ const createUser = async (req, res, next) => {
     const transaction = await sequelize.transaction();
     try {
         const operatorId = req.operator.id;
-        const {
-            fullName, phone, callDurationLimit, activeFrom, activeTo, associatedNumbers, activeDays,
+        const { fullName, phone, callDurationLimit, standard, activeTo,
+            associatedNumbers, activeDays, rfidCardNumber, timeSlots
         } = req.body;
+
+        const rfidCard = await RFIDCard.findOne({
+            where: { cardNumber: rfidCardNumber, },
+            attributes: ["id", "cardNumber", "status"],
+            transaction,
+        });
+
+        if (rfidCard) {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false, message: "RFID card already exists",
+            });
+        }
 
         const existingUser = await User.findOne({
             where: {
@@ -117,9 +131,18 @@ const createUser = async (req, res, next) => {
             fullName,
             phone,
             callDurationLimit,
-            activeFrom,
+            standard,
             activeTo,
         }, { transaction, });
+
+        if (rfidCardNumber) {
+            const newRfidCard = await RFIDCard.create({
+                cardNumber: rfidCardNumber,
+                userId: user.id,
+                operatorId,
+                status: "Active"
+            }, { transaction, });
+        }
 
         // associated numbers
         if (associatedNumbers && associatedNumbers.length > 0) {
@@ -134,6 +157,17 @@ const createUser = async (req, res, next) => {
             await UserActiveDay.bulkCreate(days, { transaction, });
         }
 
+        if (timeSlots?.length > 0) {
+            await UserTimeSlot.bulkCreate(
+                timeSlots.map(slot => ({
+                    userId: user.id,
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    status: slot.status || true,
+                })),
+                { transaction }
+            );
+        }
         // create wallet
         await Wallet.create({
             userId: user.id,
@@ -171,7 +205,7 @@ const updateUser = async (req, res, next) => {
             return res.status(404).json({ success: false, message: "User not found", });
         }
 
-        const { associatedNumbers, activeDays, ...updateData } = req.body;
+        const { associatedNumbers, activeDays, timeSlots, ...updateData } = req.body;
 
         await user.update(updateData, { transaction, });
 
@@ -222,6 +256,26 @@ const updateUser = async (req, res, next) => {
             await UserActiveDay.bulkCreate(days, { transaction, });
 
         }
+
+        if (Array.isArray(timeSlots)) {
+            await UserTimeSlot.destroy({
+                where: { userId: user.id },
+                transaction,
+            });
+
+            if (timeSlots.length) {
+                await UserTimeSlot.bulkCreate(
+                    timeSlots.map(slot => ({
+                        userId: user.id,
+                        startTime: slot.startTime,
+                        endTime: slot.endTime,
+                        status: slot.status ?? true,
+                    })),
+                    { transaction }
+                );
+            }
+        }
+
 
         await transaction.commit();
 
@@ -344,6 +398,27 @@ const userCallLogsList = async (req, res, next) => {
     }
 }
 
+const suggestDuplicatePhoneNumbers = async (req, res, next) => {
+    try {
+        const { phoneNumber } = req.query;
+        if (!phoneNumber) {
+            return res.status(400).json({ success: false, message: "Phone number is required", });
+        }
+        const users = await UserAssociatedNumber.findAll({
+            where: { phoneNumber: { [Op.like]: `%${phoneNumber}%`, }, },
+            include: [{ model: User, as: "user", attributes: ["id", "fullName", "userId"], }]
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Duplicate phone numbers found",
+            data: users
+        });
+        
+    } catch (error) {
+        next(error);
+    }
+}
 
 module.exports = {
     createUser,
@@ -352,5 +427,6 @@ module.exports = {
     updateUser,
     getAllRfidCardsByUserId,
     userWalletTransaction,
-    userCallLogsList
+    userCallLogsList,
+    suggestDuplicatePhoneNumbers
 };

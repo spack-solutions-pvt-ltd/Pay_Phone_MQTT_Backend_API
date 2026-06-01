@@ -45,6 +45,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "userId",
         as: "transaction"
       })
+      this.hasMany(models.UserTimeSlot, {
+        foreignKey: "userId",
+        as: "timeSlots"
+      })
     }
   }
   User.init({
@@ -53,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
     fullName: DataTypes.STRING,
     phone: DataTypes.STRING,
     callDurationLimit: DataTypes.INTEGER,
-    activeFrom: DataTypes.STRING,
+    standard: DataTypes.STRING,
     activeTo: DataTypes.STRING,
     status: {
       type: DataTypes.ENUM("Active", "Inactive", "Blocked"),
