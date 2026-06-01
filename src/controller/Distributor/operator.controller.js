@@ -362,7 +362,7 @@ const reachargeOperatorWallet = async (req, res, next) => {
             distributorId,
             amount,
             type,
-            transactionType: type === "Credit" ? "RECEIVED_FROM_DISTRIBUTOR" : "RETURNED_TO_DISTRIBUTOR",
+            transactionType: type === "Credit" ? "ADD_FUNDS" : "DEDUCT_FUNDS",
             remainingBalance: operatorUpdatedBalance,
             paymentMode: paymentMode || "Wallet Transfer",
         }, { transaction, });
