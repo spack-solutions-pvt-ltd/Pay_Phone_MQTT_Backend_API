@@ -57,6 +57,7 @@ const callStartHandler = async (incomingMessage, client) => {
             min_left: min_left,
             start_credits: userWallet.balance,
             end_credits: credits,
+            creditsUsed: Number(userWallet.balance)  - Number(credits),
             status: false
         })
 

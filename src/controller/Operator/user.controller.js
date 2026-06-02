@@ -69,6 +69,7 @@ const getUserById = async (req, res, next) => {
                 { model: UserAssociatedNumber, as: "associatedNumbers", },
                 { model: UserActiveDay, as: "activeDays", },
                 { model: Wallet, as: "wallet", },
+                { model: UserTimeSlot, as: "timeSlots", },
                 // { model: RFIDCard, as: "rfidCards" }
             ],
         });
@@ -244,6 +245,19 @@ const updateUser = async (req, res, next) => {
                     transaction,
                 });
             }
+
+            // remove existing numbers
+            if (numbersToRemove.length > 0) {
+                await UserAssociatedNumber.destroy({
+                    where: {
+                        userId: user.id,
+                        phoneNumber: {
+                            [Op.in]: numbersToRemove.map(n => n.phoneNumber),
+                        },
+                    },
+                    transaction,
+                });
+            }
         }
 
         // update active days
@@ -400,13 +414,18 @@ const userCallLogsList = async (req, res, next) => {
 
 const suggestDuplicatePhoneNumbers = async (req, res, next) => {
     try {
-        const { phoneNumber } = req.query;
+        const operatorId = req.operator.id;
+        const { phoneNumber } = req.body;
         if (!phoneNumber) {
             return res.status(400).json({ success: false, message: "Phone number is required", });
         }
         const users = await UserAssociatedNumber.findAll({
             where: { phoneNumber: { [Op.like]: `%${phoneNumber}%`, }, },
-            include: [{ model: User, as: "user", attributes: ["id", "fullName", "userId"], }]
+            include: [{
+                model: User, as: "user", where: { operatorId, },
+                attributes: ["id", "fullName", "userId"],required: true
+            }],
+            attributes: ["id", "phoneNumber"],
         })
 
         return res.status(200).json({
@@ -414,7 +433,7 @@ const suggestDuplicatePhoneNumbers = async (req, res, next) => {
             message: "Duplicate phone numbers found",
             data: users
         });
-        
+
     } catch (error) {
         next(error);
     }

@@ -44,7 +44,7 @@ const runningCallHandler = async (incomingMessage, client) => {
 
         const endTime = time_stamp || Date.now();
 
-        const duration = Math.floor((endTime - new Date(runnigCall.startTime)) / 1000);
+        const duration = Math.floor((endTime - new Date(callLog.startTime)) / 1000);
 
         callLog.duration = duration
         callLog.min_left = min_left;

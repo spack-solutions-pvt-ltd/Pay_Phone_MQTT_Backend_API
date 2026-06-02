@@ -72,7 +72,7 @@ const rfidHandler = async (incomingMessage, client) => {
         }
 
         if (user.status == "Blocked") {
-            console.warn(` User blocked : ${card.userId}`);
+            console.warn(`User blocked : ${card.userId}`);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -152,7 +152,8 @@ const rfidHandler = async (incomingMessage, client) => {
             where: {
                 userId: user.id,
                 startTime: { [Op.lte]: currentTime },
-                endTime: { [Op.gte]: currentTime }
+                endTime: { [Op.gte]: currentTime },
+                status: true
             }
         })
 

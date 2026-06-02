@@ -12,13 +12,11 @@ const createUserValidation = [
     body("callDurationLimit").notEmpty().withMessage("Call duration limit is required")
         .isNumeric().withMessage("Call duration limit must be number"),
 
-    body("activeFrom").notEmpty().withMessage("Active from time is required"),
-
-    body("activeTo").notEmpty().withMessage("Active to time is required"),
-
     body("associatedNumbers").isArray().withMessage("Associated numbers must be array"),
 
     body("activeDays").isArray().withMessage("Active days must be array"),
+
+    body("timeSlots").isArray().withMessage("Time slots must be array"),
 
     validationMiddleware,
 ];
@@ -30,13 +28,11 @@ const updateUserValidation = [
     body("callDurationLimit").notEmpty().withMessage("Call duration limit is required")
         .isNumeric().withMessage("Call duration limit must be number"),
 
-    body("activeFrom").notEmpty().withMessage("Active from time is required"),
-
-    body("activeTo").notEmpty().withMessage("Active to time is required"),
-
     body("associatedNumbers").isArray().withMessage("Associated numbers must be array"),
 
     body("activeDays").isArray().withMessage("Active days must be array"),
+
+    body("timeSlots").isArray().withMessage("Time slots must be array"),
 
     validationMiddleware,
 ];

@@ -10,7 +10,7 @@ router.get("/:id", getUserById);
 router.get("/:id/rfid-cards", getAllRfidCardsByUserId);
 router.get("/:id/wallet-transactions", userWalletTransaction);
 router.get("/:id/call-logs", userCallLogsList);
-router.get("/duplicate-numbers", suggestDuplicatePhoneNumbers);
+router.post("/duplicate-number", suggestDuplicatePhoneNumbers);
 router.post("/", createUserValidation, createUser);
 router.put("/:id", updateUserValidation, updateUser);
 

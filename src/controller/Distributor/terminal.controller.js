@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Terminal, Operator } = require("../../models");
+const { Terminal, Operator, CallLog, User } = require("../../models");
 const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
 
 const createDistributorTerminal = async (req, res, next) => {
@@ -118,7 +118,13 @@ const getAllDistributorTerminals = async (req, res, next) => {
 const getDistributorTerminalById = async (req, res, next) => {
     try {
 
-        const terminal = await Terminal.findByPk(req.params.id);
+        const terminal = await Terminal.findByPk(req.params.id,
+            {
+                include: [
+                    { model: Operator, as: "operator", attributes: ["id", "name", "operatorId"], },
+                ],
+            }
+        );
 
         if (!terminal) {
             return res.status(404).json({
@@ -232,11 +238,65 @@ const getAllNonAssociatedTerminals = async (req, res, next) => {
     }
 }
 
+const getAllCallsListByTerminal = async (req, res, next) => {
+    try {
+        const terminalId = req.params.id;
+        let { page = 1, limit = 10, search = "", status } = req.query;
+
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const whereCondition = { terminalId };
+
+        // status filter
+        if (status) {
+            whereCondition.status = status;
+        }
+
+        // search
+        if (search) {
+            whereCondition[Op.or] = [
+                { callerId: { [Op.like]: `%${search}%`, }, },
+                { phoneNumber: { [Op.like]: `%${search}%`, }, },
+                { "$user.fullName$": { [Op.like]: `%${search}%`, }, },
+                { "$user.userId$": { [Op.like]: `%${search}%`, }, },
+
+            ];
+        }
+
+        const { rows, count } = await CallLog.findAndCountAll({
+            where: whereCondition,
+            include: [
+                { model: User, as: "user", attributes: ["id", "fullName", "userId"], },
+            ],
+            limit,
+            offset,
+            order: [["id", "DESC"]],
+        })
+        return res.status(200).json({
+            success: true,
+            message: "Call list for terminal",
+            data: rows,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     createDistributorTerminal,
     getAllDistributorTerminals,
     getDistributorTerminalById,
     updateDistributorTerminal,
     statusUpdateDistributorTerminal,
-    getAllNonAssociatedTerminals
+    getAllNonAssociatedTerminals,
+    getAllCallsListByTerminal
 };
