@@ -324,10 +324,14 @@ const getAllLogsByTerminalId = async (req, res, next) => {
             order: [["id", "DESC"]],
         });
 
+        const formattedLogs = logs.map(log => ({
+            ...log.toJSON(),
+            message: typeof log.message === "string" ? JSON.parse(log.message) : log.message,
+        }));
         return res.status(200).json({
             success: true,
             message: "Terminal logs list",
-            data: logs,
+            data: formattedLogs,
             pagination: {
                 total: count,
                 currentPage: page,
