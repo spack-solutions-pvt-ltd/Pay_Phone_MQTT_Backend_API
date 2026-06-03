@@ -43,8 +43,10 @@ module.exports = (sequelize, DataTypes) => {
     rfidCardId: DataTypes.BIGINT,
     min_left: DataTypes.FLOAT,
     start_credits: DataTypes.DECIMAL,
-    end_credits: DataTypes.DECIMAL
-    // type: DataTypes.ENUM('missed', 'answered', 'voicemail'),    
+    end_credits: DataTypes.DECIMAL,
+    tid: DataTypes.STRING,
+    cid: DataTypes.STRING,
+    timeSlotId : DataTypes.BIGINT
   }, {
     sequelize,
     modelName: 'CallLog',

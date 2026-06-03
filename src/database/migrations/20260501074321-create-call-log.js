@@ -52,6 +52,15 @@ module.exports = {
       end_credits: {
         type: Sequelize.DECIMAL
       },
+      tid: {
+        type: Sequelize.STRING
+      },
+      cid: {
+        type: Sequelize.STRING
+      },
+      timeSlotId: {
+        type: Sequelize.BIGINT
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
