@@ -1,5 +1,7 @@
-const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet } = require('../models');
+const { Op } = require('sequelize');
+const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet, UserTimeSlot } = require('../models');
 const { logTerminalEvent } = require('../utils/LogCreation');
+const moment = require('moment-timezone');
 
 const callStartHandler = async (incomingMessage, client) => {
     try {
@@ -46,6 +48,16 @@ const callStartHandler = async (incomingMessage, client) => {
             where: { userId: card.userId, accountType: "User" }
         });
 
+        const currentTime = moment().tz("Asia/Kolkata").format("HH:mm:ss");
+        
+        const timeSlot = await UserTimeSlot.findOne({
+            where: {
+                userId: card.userId,
+                startTime: { [Op.lte]: currentTime },
+                endTime: { [Op.gte]: currentTime },
+                status: true
+            }
+        })
 
         await CallLog.create({
             callerId: `Cl${Date.now()}`,
@@ -59,7 +71,10 @@ const callStartHandler = async (incomingMessage, client) => {
             start_credits: userWallet.balance,
             end_credits: credits,
             creditsUsed: Number(userWallet.balance) - Number(credits),
-            status: false
+            status: false,
+            tid: tid,
+            cid: cid,
+            timeSlotId: timeSlot ? timeSlot.id : null
         })
 
         await userWallet.update({ balance: credits })
@@ -68,7 +83,7 @@ const callStartHandler = async (incomingMessage, client) => {
             type: "CSTATACK",
             time_stamp: Date.now(),
         }
-        
+
         logTerminalEvent(terminal.id, "Server", response.type, response);
 
         client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
