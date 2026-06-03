@@ -4,12 +4,12 @@ const { generateAccessToken } = require("./jwtHelper");
 
 const createRefreshToken = async (user, type, expiryTime = Date.now() + 1000 * 60 * 60 * 24 * 1) => {
 
-    await RefreshToken.destroy({
-        where: {
-            userId: user.id,
-            type,
-        },
-    });
+    // await RefreshToken.destroy({
+    //     where: {
+    //         userId: user.id,
+    //         type,
+    //     },
+    // });
 
     let token = uuidv4();
     let expiryDate = expiryTime || Date.now() + 1000 * 60 * 60 * 24 * 1;
