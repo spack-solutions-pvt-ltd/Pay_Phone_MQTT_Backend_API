@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const { Terminal, Operator, CallLog, User, TerminalLog } = require("../../models");
 const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
+const moment = require("moment-timezone");
 
 const createDistributorTerminal = async (req, res, next) => {
     try {
@@ -263,6 +264,21 @@ const getAllCallsListByTerminal = async (req, res, next) => {
                 { "$user.userId$": { [Op.like]: `%${search}%`, }, },
 
             ];
+        }
+        if (startDate && endDate) {
+            const start = moment.tz(startDate, "Asia/Kolkata")
+                .startOf("day")
+                .utc()
+                .toDate();
+
+            const end = moment.tz(endDate, "Asia/Kolkata")
+                .endOf("day")
+                .utc()
+                .toDate();
+
+            whereCondition.createdAt = {
+                [Op.between]: [start, end],
+            };
         }
 
         const { rows, count } = await CallLog.findAndCountAll({

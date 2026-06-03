@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
 const { Terminal, CallLog, User, TerminalLog } = require("../../models");
+const moment = require("moment-timezone");
 
 const getAllOperatorTerminals = async (req, res, next) => {
     try {
@@ -123,11 +124,20 @@ const getCallListByTerminalId = async (req, res, next) => {
         }
 
         if (startDate && endDate) {
+            const start = moment.tz(startDate, "Asia/Kolkata")
+                .startOf("day")
+                .utc()
+                .toDate();
+
+            const end = moment.tz(endDate, "Asia/Kolkata")
+                .endOf("day")
+                .utc()
+                .toDate();
+
             whereCondition.createdAt = {
-                [Op.between]: [new Date(startDate), new Date(endDate)],
+                [Op.between]: [start, end],
             };
         }
-
         const { count, rows } = await CallLog.findAndCountAll({
             where: whereCondition,
             include: [
