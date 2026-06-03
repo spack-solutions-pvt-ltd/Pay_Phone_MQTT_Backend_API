@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { User, Wallet, CallLog, Terminal, UserTimeSlot } = require('../models');
 const { logTerminalEvent } = require('../utils/LogCreation');
+const moment = require('moment-timezone');
 
 const runningCallHandler = async (incomingMessage, client) => {
     try {
