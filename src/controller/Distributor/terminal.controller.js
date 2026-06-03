@@ -242,7 +242,7 @@ const getAllNonAssociatedTerminals = async (req, res, next) => {
 const getAllCallsListByTerminal = async (req, res, next) => {
     try {
         const terminalId = req.params.id;
-        let { page = 1, limit = 10, search = "", status } = req.query;
+        let { page = 1, limit = 10, search = "", status, startDate, endDate } = req.query;
 
         page = Number(page);
         limit = Number(limit);
