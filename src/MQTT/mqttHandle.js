@@ -90,7 +90,7 @@ client.on('message', async function (topic, message, packet, done,) {
     }
 });
 
-// client.subscribe('sseiot');
+client.subscribe('sseiot');
 
 client.on('error', function (error) {
     console.log(error?.message);
