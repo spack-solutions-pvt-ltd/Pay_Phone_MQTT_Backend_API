@@ -190,7 +190,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
 
         // Today Call Usage
-        const todayUsedMinutes = await CallLog.sum("duration", {
+        const todayUsedSec = await CallLog.sum("duration", {
             where: {
                 userId: user.id,
                 createdAt: {
@@ -201,7 +201,7 @@ const rfidHandler = async (incomingMessage, client) => {
                 }
             }
         });
-
+        const todayUsedMinutes = Math.ceil(todayUsedSec / 60);
         const usedMinutes = Number(todayUsedMinutes || 0);
 
         const leftMinutes = Math.max(Number(user.callDurationLimit) - usedMinutes, 0);

@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/", getAllDistributorTerminals);
 router.get("/non-associated", getAllNonAssociatedTerminals);
 router.get("/calls/:id", getAllCallsListByTerminal);
-router.get("/logs/:id", getAllLogsByTerminalId);
+router.get("/logs/:terminalId", getAllLogsByTerminalId);
 router.get("/:id", getDistributorTerminalById);
 router.post("/", createTerminalValidation, createDistributorTerminal);
 router.put("/:id", updateTerminalValidation, updateDistributorTerminal);
