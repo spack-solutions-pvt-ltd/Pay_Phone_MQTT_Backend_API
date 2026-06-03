@@ -8,6 +8,7 @@ const { endCallHandler } = require('./end.call.service')
 const { callStartHandler } = require('./call.start.service')
 const { TerminalHandler } = require('./terminal.service')
 const { runningCallHandler } = require('./running.call.service')
+const { logTerminalEvent } = require('../utils/LogCreation')
 
 const mqttPort = process.env.MQTT_PORT
 const userName = process.env.MQTT_USER_NAME
@@ -26,7 +27,7 @@ client.on('connect', () => {
     console.log('MQTT client connected')
 })
 
-client.on('message', function (topic, message, packet, done,) {
+client.on('message', async function (topic, message, packet, done,) {
     let incomingMessage;
     try {
         console.log("sseiot message", message.toString())
@@ -40,37 +41,56 @@ client.on('message', function (topic, message, packet, done,) {
         console.log("This is Other topic please check", topic)
     }
 
-    switch (incomingMessage.type) {
-        case "PING":
-            heartbeatHandler(incomingMessage, client);
-            break;
+    try {
+        const terminal = await Terminal.findOne({
+            where: { terminalId: incomingMessage.tid, },
+            attributes: ["id", "terminalId", "lastPingAt"]
+        });
 
-        case "CARQ":
-            rfidHandler(incomingMessage, client);
-            break;
+        if (!terminal) {
+            console.warn(`Terminal not found : ${incomingMessage.tid}`);
+            return;
+        }
 
-        case "CSTAT":
-            callStartHandler(incomingMessage, client);
-            break;
+        terminal.lastPingAt = new Date();
+        await terminal.save();
 
-        case "CUPD":
-            runningCallHandler(incomingMessage, client);
-            break;
+        logTerminalEvent(terminal.id, "Terminal", incomingMessage.type, incomingMessage);
 
-        case "CEND":
-            endCallHandler(incomingMessage, client);
-            break;
+        switch (incomingMessage.type) {
+            case "PING":
+                heartbeatHandler(incomingMessage, client);
+                break;
 
-        case "TCMDACK":
-            TerminalHandler(incomingMessage);
-            break;
+            case "CARQ":
+                rfidHandler(incomingMessage, client);
+                break;
 
-        default:
-            console.log("Unknown packet type");
+            case "CSTAT":
+                callStartHandler(incomingMessage, client);
+                break;
+
+            case "CUPD":
+                runningCallHandler(incomingMessage, client);
+                break;
+
+            case "CEND":
+                endCallHandler(incomingMessage, client);
+                break;
+
+            case "TCMDACK":
+                TerminalHandler(incomingMessage);
+                break;
+
+            default:
+                console.log("Unknown packet type");
+        }
+    } catch (error) {
+        console.error("MQTT Processing Error:", error);
     }
 });
 
-client.subscribe('sseiot');
+// client.subscribe('sseiot');
 
 client.on('error', function (error) {
     console.log(error?.message);
@@ -86,13 +106,14 @@ client.on('offline', (res) => {
 
 
 // Terminal Block 
-const blockTerminal = async (terminalId) => {
+const blockTerminal = async (terminalId, id) => {
     try {
         const request = {
             type: "TCMD",
             tid: terminalId,
             allowed: false
         }
+        logTerminalEvent(id, "Server", request.type, request);
         client.publish(terminalId, JSON.stringify(request), (err) => {
             if (err) {
                 console.error('Error message:', err);
@@ -104,14 +125,14 @@ const blockTerminal = async (terminalId) => {
     }
 }
 
-const unblockTerminal = async (terminalId) => {
+const unblockTerminal = async (terminalId, id) => {
     try {
         const request = {
             type: "TCMD",
             tid: terminalId,
             allowed: true
         }
-
+        logTerminalEvent(id, "Server", request.type, request);
         client.publish(terminalId, JSON.stringify(request), (err) => {
             if (err) {
                 console.error('Error message:', err);
@@ -161,12 +182,11 @@ setInterval(checkNotClosedCalls, 2 * 60 * 1000);
 // publish message 
 // setInterval(() => {
 //     const message = {
-//         "type": "heartbeat",
-//         "data": {
-//             "tid": "TRM1002",
-//             "imei": "123456789012345",
-//             "sim": "6345789548"
-//         }
+//         "type": "PING",
+//         "tid": "05260100001",
+//         "imei": "123456789012345",
+//         "sim": "6345789548"
+
 //     }
 //     client.publish("sseiot", JSON.stringify(message), (err) => {
 //         if (err) {

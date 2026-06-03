@@ -1,4 +1,5 @@
 const { User, Wallet, CallLog, Terminal } = require('../models');
+const { logTerminalEvent } = require('../utils/LogCreation');
 
 const runningCallHandler = async (incomingMessage, client) => {
     try {
@@ -60,7 +61,7 @@ const runningCallHandler = async (incomingMessage, client) => {
             type: "CUPDACK",
             time_stamp: Date.now(),
         }
-
+        logTerminalEvent(terminal.id, "Server", response.type, response);
         client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
             if (err) {
                 console.error('Error message:', err);

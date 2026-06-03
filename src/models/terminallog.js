@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   TerminalLog.init({
     terminalId: DataTypes.BIGINT,
     from: DataTypes.STRING,
+    type: DataTypes.STRING,
     message: DataTypes.STRING
   }, {
     sequelize,

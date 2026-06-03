@@ -92,7 +92,7 @@ const createUser = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
         const { fullName, phone, callDurationLimit, standard, activeTo,
-            associatedNumbers, activeDays, rfidCardNumber, timeSlots
+            associatedNumbers, activeDays, rfidCardNumber,  timeSlots
         } = req.body;
 
         const rfidCard = await RFIDCard.findOne({
@@ -423,7 +423,7 @@ const suggestDuplicatePhoneNumbers = async (req, res, next) => {
             where: { phoneNumber: { [Op.like]: `%${phoneNumber}%`, }, },
             include: [{
                 model: User, as: "user", where: { operatorId, },
-                attributes: ["id", "fullName", "userId"],required: true
+                attributes: ["id", "fullName", "userId"], required: true
             }],
             attributes: ["id", "phoneNumber"],
         })

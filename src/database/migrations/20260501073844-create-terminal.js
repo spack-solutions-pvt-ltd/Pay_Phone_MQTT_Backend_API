@@ -49,6 +49,9 @@ module.exports = {
         ),
         defaultValue: "Inactive"
       },
+      sstr: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

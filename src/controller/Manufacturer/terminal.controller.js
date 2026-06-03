@@ -188,9 +188,9 @@ const statusUpdateTerminal = async (req, res, next) => {
         }
 
         if (status == "Blocked") {
-            await blockTerminal(terminal.terminalId)
+            await blockTerminal(terminal.terminalId, terminal.id)
         } else {
-            await unblockTerminal(terminal.terminalId)
+            await unblockTerminal(terminal.terminalId, terminal.id)
         }
         // await terminal.update({ status });
 

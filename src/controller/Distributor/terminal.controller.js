@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Terminal, Operator, CallLog, User } = require("../../models");
+const { Terminal, Operator, CallLog, User, TerminalLog } = require("../../models");
 const { unblockTerminal, blockTerminal } = require("../../MQTT/mqttHandle");
 
 const createDistributorTerminal = async (req, res, next) => {
@@ -199,9 +199,9 @@ const statusUpdateDistributorTerminal = async (req, res, next) => {
         }
 
         if (status == "Blocked") {
-            await blockTerminal(terminal.terminalId)
+            await blockTerminal(terminal.terminalId, terminal.id)
         } else {
-            await unblockTerminal(terminal.terminalId)
+            await unblockTerminal(terminal.terminalId, terminal.id)
         }
 
         // await terminal.update({ status });
@@ -291,6 +291,39 @@ const getAllCallsListByTerminal = async (req, res, next) => {
     }
 }
 
+
+const getAllLogsByTerminalId = async (req, res, next) => {
+    try {
+        const terminalId = req.params.terminalId;
+        let { page = 1, limit = 10 } = req.query;
+
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const { rows: logs, count } = await TerminalLog.findAndCountAll({
+            where: { terminalId },
+            limit,
+            offset,
+            order: [["id", "DESC"]],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Terminal logs list",
+            data: logs,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
 module.exports = {
     createDistributorTerminal,
     getAllDistributorTerminals,
@@ -298,5 +331,6 @@ module.exports = {
     updateDistributorTerminal,
     statusUpdateDistributorTerminal,
     getAllNonAssociatedTerminals,
-    getAllCallsListByTerminal
+    getAllCallsListByTerminal,
+    getAllLogsByTerminalId
 };

@@ -1,6 +1,6 @@
 
 const express = require("express");
-const { getAllDistributorTerminals, getDistributorTerminalById, createDistributorTerminal, updateDistributorTerminal, statusUpdateDistributorTerminal, getAllNonAssociatedTerminals, getAllCallsListByTerminal } = require("../../controller/Distributor/terminal.controller");
+const { getAllDistributorTerminals, getDistributorTerminalById, createDistributorTerminal, updateDistributorTerminal, statusUpdateDistributorTerminal, getAllNonAssociatedTerminals, getAllCallsListByTerminal, getAllLogsByTerminalId } = require("../../controller/Distributor/terminal.controller");
 const { updateTerminalValidation, createTerminalValidation } = require("../../validation/distributor/terminalValidation");
 
 const router = express.Router();
@@ -9,10 +9,12 @@ const router = express.Router();
 router.get("/", getAllDistributorTerminals);
 router.get("/non-associated", getAllNonAssociatedTerminals);
 router.get("/calls/:id", getAllCallsListByTerminal);
+router.get("/logs/:id", getAllLogsByTerminalId);
 router.get("/:id", getDistributorTerminalById);
 router.post("/", createTerminalValidation, createDistributorTerminal);
 router.put("/:id", updateTerminalValidation, updateDistributorTerminal);
 router.patch("/:id/status", updateTerminalValidation, statusUpdateDistributorTerminal);
+
 
 
 /**

@@ -1,4 +1,5 @@
 const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet, WalletTransaction } = require("../models");
+const { logTerminalEvent } = require("../utils/LogCreation");
 
 
 
@@ -102,6 +103,8 @@ const endCallHandler = async (incomingMessage, client) => {
             type: "CENDACK",
             time_stamp: Date.now(),
         }
+
+        logTerminalEvent(terminal.id, "Server", response.type, response);
 
         client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
             if (err) {

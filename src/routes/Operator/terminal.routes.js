@@ -1,12 +1,13 @@
 
 const express = require("express");
-const { getAllOperatorTerminals, getTerminalById, getCallListByTerminalId } = require("../../controller/Operator/terminal.controller");
+const { getAllOperatorTerminals, getTerminalById, getCallListByTerminalId, getAllLogsByTerminalId } = require("../../controller/Operator/terminal.controller");
 
 const router = express.Router();
 
-router.get("/",getAllOperatorTerminals);
-router.get("/:id",getTerminalById);
-router.get("/call-list/:terminalId",getCallListByTerminalId);
+router.get("/", getAllOperatorTerminals);
+router.get("/:id", getTerminalById);
+router.get("/call-list/:terminalId", getCallListByTerminalId);
+router.get("/logs/:terminalId", getAllLogsByTerminalId);
 
 
 /**

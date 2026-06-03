@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Terminal, CallLog, User } = require("../../models");
+const { Terminal, CallLog, User, TerminalLog } = require("../../models");
 
 const getAllOperatorTerminals = async (req, res, next) => {
     try {
@@ -101,10 +101,7 @@ const getCallListByTerminalId = async (req, res, next) => {
         });
 
         if (!terminal) {
-            return res.status(404).json({
-                success: false,
-                message: "Terminal not found",
-            });
+            return res.status(404).json({ success: false, message: "Terminal not found", });
         }
         const whereCondition = { terminalId };
 
@@ -117,9 +114,10 @@ const getCallListByTerminalId = async (req, res, next) => {
         if (search) {
 
             whereCondition[Op.or] = [
-                { caller: { [Op.like]: `%${search}%`, }, },
-                { receiver: { [Op.like]: `%${search}%`, }, },
-                { callType: { [Op.like]: `%${search}%`, }, },
+                { callerId: { [Op.like]: `%${search}%`, }, },
+                { phoneNumber: { [Op.like]: `%${search}%`, }, },
+                { "$user.fullName$": { [Op.like]: `%${search}%`, }, },
+                { "$user.userId$": { [Op.like]: `%${search}%`, }, },
             ];
 
         }
@@ -143,6 +141,12 @@ const getCallListByTerminalId = async (req, res, next) => {
             success: true,
             message: "Call list",
             data: rows,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
         });
 
     } catch (error) {
@@ -150,8 +154,45 @@ const getCallListByTerminalId = async (req, res, next) => {
     }
 };
 
+const getAllLogsByTerminalId = async (req, res, next) => {
+    try {
+        const terminalId = req.params.terminalId;
+        let { page = 1, limit = 10 } = req.query;
+
+        page = Number(page);
+        limit = Number(limit);
+        const offset = (page - 1) * limit;
+
+        const { rows: logs, count } = await TerminalLog.findAndCountAll({
+            where: { terminalId },
+            limit,
+            offset,
+            order: [["id", "DESC"]],
+        });
+        const formattedLogs = logs.map(log => ({
+            ...log.toJSON(),
+            message: typeof log.message === "string" ? JSON.parse(log.message) : log.message,
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Terminal logs list",
+            data: formattedLogs,
+            pagination: {
+                total: count,
+                currentPage: page,
+                totalPages: Math.ceil(count / limit),
+                limit,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getAllOperatorTerminals,
     getTerminalById,
     getCallListByTerminalId,
+    getAllLogsByTerminalId
 };

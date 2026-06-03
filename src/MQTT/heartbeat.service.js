@@ -1,4 +1,5 @@
 const { Terminal } = require("../models");
+const { logTerminalEvent } = require("../utils/LogCreation");
 
 const heartbeatHandler = async (incomingMessage, client) => {
     try {
@@ -39,6 +40,8 @@ const heartbeatHandler = async (incomingMessage, client) => {
                 allowed: false
             }
 
+            logTerminalEvent(terminal.id, "Server", request.type, request);
+
             return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -53,17 +56,17 @@ const heartbeatHandler = async (incomingMessage, client) => {
         if (sim && terminal.simNo !== sim) {
             console.warn(`SIM number mismatch for terminal ${tid}. Expected: ${terminal.simNo}, Received: ${sim}`);
 
-            const request = {
-                type: "TCMD",
-                tid: terminal.terminalId,
-                allowed: false
-            }
-
-            return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
-                if (err) {
-                    console.error('Error message:', err);
-                }
-            },);
+            // const request = {
+            //     type: "TCMD",
+            //     tid: terminal.terminalId,
+            //     allowed: false
+            // }
+            // logTerminalEvent(terminal.id, "Server", request.type, request);
+            // return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
+            //     if (err) {
+            //         console.error('Error message:', err);
+            //     }
+            // },);
         }
 
         if (imei && terminal.imeiNo !== imei) {
@@ -84,7 +87,7 @@ const heartbeatHandler = async (incomingMessage, client) => {
             type: "PINGACK",
             allowed: true
         }
-
+        logTerminalEvent(terminal.id, "Server", response.type, response);
         return client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
             if (err) {
                 console.error('Error message:', err);

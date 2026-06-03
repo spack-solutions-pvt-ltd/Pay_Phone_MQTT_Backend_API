@@ -1,4 +1,5 @@
 const { Terminal, RFIDCard, User, UserAssociatedNumber, CallLog, Wallet } = require('../models');
+const { logTerminalEvent } = require('../utils/LogCreation');
 
 const callStartHandler = async (incomingMessage, client) => {
     try {
@@ -57,7 +58,7 @@ const callStartHandler = async (incomingMessage, client) => {
             min_left: min_left,
             start_credits: userWallet.balance,
             end_credits: credits,
-            creditsUsed: Number(userWallet.balance)  - Number(credits),
+            creditsUsed: Number(userWallet.balance) - Number(credits),
             status: false
         })
 
@@ -67,6 +68,8 @@ const callStartHandler = async (incomingMessage, client) => {
             type: "CSTATACK",
             time_stamp: Date.now(),
         }
+        
+        logTerminalEvent(terminal.id, "Server", response.type, response);
 
         client.publish(`${terminal.terminalId}`, JSON.stringify(response), (err) => {
             if (err) {

@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Terminal, RFIDCard, User, wallet, UserAssociatedNumber, UserActiveDay,
     CallLog, Operator, Wallet, UserTimeSlot } = require('../models');
 const moment = require('moment-timezone');
+const { logTerminalEvent } = require('../utils/LogCreation');
 
 const rfidHandler = async (incomingMessage, client) => {
     try {
@@ -25,6 +26,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!terminal) {
             console.warn(`Terminal not found : ${tid}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -42,6 +44,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!card) {
             console.warn(`RFID Card not found : ${cid}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -51,6 +54,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (card.status !== "Active") {
             console.warn(`RFID Card blocked : ${card.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -64,6 +68,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!user) {
             console.warn(`User not found : ${card.userId}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -73,6 +78,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (user.status == "Blocked") {
             console.warn(`User blocked : ${card.userId}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -82,6 +88,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (user.operatorId != terminal.operatorId) {
             console.warn(`User operator mismatch : ${card.userId}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -95,6 +102,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (userWallet.balance <= 0) {
             console.warn(`User wallet balance not enough : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -109,6 +117,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (associatedNumber.length === 0) {
             console.warn(`Associated number not found : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -129,6 +138,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!activeDaysData) {
             console.warn(` User active days not found : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -140,6 +150,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!activeDays.includes(today)) {
             console.warn(`User inactive today : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -160,6 +171,7 @@ const rfidHandler = async (incomingMessage, client) => {
         // Active Time Validation
         if (!timeSlot) {
             console.warn(`User inactive at this time : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -196,6 +208,7 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (leftMinutes <= 0) {
             console.warn(`Daily limit exceeded : ${user.id}`);
+            logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return client.publish(`${terminal.terminalId}`, JSON.stringify(notAllowedResponse), (err) => {
                 if (err) {
                     console.error('Error message:', err);
@@ -215,6 +228,7 @@ const rfidHandler = async (incomingMessage, client) => {
             pulse_rate: 60,
             unit_rate: Number(operator.per_min_price || 0),
         }
+        logTerminalEvent(terminal.id, "Server", res.type, res);
 
         client.publish(`${terminal.terminalId}`, JSON.stringify(res), (err) => {
             if (err) {

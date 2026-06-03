@@ -11,6 +11,7 @@ const distributorRoutes = require("./src/routes/Distributor/index");
 const operatorRoutes = require("./src/routes/Operator/index");
 const swaggerUi = require('swagger-ui-express');
 require('./src/MQTT/mqttHandle')
+require('./src/utils/cronJob')
 const db = require("./src/models");
 const { manufacturerSwaggerSpec, distributorSwaggerSpec, operatorSwaggerSpec } = require("./src/helpers/swagger");
 
