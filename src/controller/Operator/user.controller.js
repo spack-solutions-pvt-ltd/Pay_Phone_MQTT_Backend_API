@@ -34,7 +34,10 @@ const getAllUsers = async (req, res, next) => {
 
         const { count, rows } = await User.findAndCountAll({
             where: whereCondition,
-            include: [{ model: Wallet, as: "wallet", },],
+            include: [
+                { model: Wallet, as: "wallet", },
+                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false },
+            ],
             limit,
             offset,
             order: [["id", "DESC"]],
@@ -92,8 +95,12 @@ const createUser = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
         const { fullName, phone, callDurationLimit, standard, activeTo,
-            associatedNumbers, activeDays, rfidCardNumber,  timeSlots
+            associatedNumbers, activeDays, rfidCardNumber, timeSlots
         } = req.body;
+
+        if (!rfidCardNumber) {
+            return res.status(400).json({ success: false, message: "RFID card number is required", });
+        }
 
         const rfidCard = await RFIDCard.findOne({
             where: { cardNumber: rfidCardNumber, },
