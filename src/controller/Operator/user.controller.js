@@ -23,6 +23,9 @@ const getAllUsers = async (req, res, next) => {
             whereCondition[Op.or] = [
                 { fullName: { [Op.like]: `%${search}%`, }, },
                 { userId: { [Op.like]: `%${search}%`, }, },
+                { phone: { [Op.like]: `%${search}%`, }, },
+                { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
+                { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
             ];
 
         }
@@ -37,9 +40,12 @@ const getAllUsers = async (req, res, next) => {
             include: [
                 { model: Wallet, as: "wallet", },
                 { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false },
+                { model: UserAssociatedNumber, as: "associatedNumbers", },
             ],
             limit,
             offset,
+            distinct: true,
+            subQuery: false,
             order: [["id", "DESC"]],
         });
 
