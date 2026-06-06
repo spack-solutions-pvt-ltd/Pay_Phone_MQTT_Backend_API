@@ -19,13 +19,13 @@ const rfidHandler = async (incomingMessage, client) => {
             where: { terminalId: tid },
             attributes: ["id", "operatorId", "terminalId"]
         });
-        const notAllowedResponse = {
-            type: "CARSP",
-            allowed: false
-        }
 
         if (!terminal) {
             console.warn(`Terminal not found : ${tid}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "MISMATCH",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, tid, notAllowedResponse);
         }
@@ -40,12 +40,20 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!card) {
             console.warn(`RFID Card not found : ${cid}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "NOREG",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
 
         if (card.status !== "Active") {
             console.warn(`RFID Card blocked : ${card.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "INACTIVE",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -56,18 +64,30 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!user) {
             console.warn(`User not found : ${card.userId}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "BLOCKED",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
 
         if (user.status == "Blocked") {
             console.warn(`User blocked : ${card.userId}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "BLOCKED",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
 
         if (user.operatorId != terminal.operatorId) {
             console.warn(`User operator mismatch : ${card.userId}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "MISMATCH",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -78,6 +98,10 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (userWallet.balance <= 0) {
             console.warn(`User wallet balance not enough : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "LOWCREDITS",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -89,6 +113,10 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (associatedNumber.length === 0) {
             console.warn(`Associated number not found : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "NOTFOUND",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -106,6 +134,10 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!activeDaysData) {
             console.warn(` User active days not found : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "NOTODAY",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -114,6 +146,10 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (!activeDays.includes(today)) {
             console.warn(`User inactive today : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "NOTODAY",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -131,6 +167,10 @@ const rfidHandler = async (incomingMessage, client) => {
         // Active Time Validation
         if (!timeSlot) {
             console.warn(`User inactive at this time : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "NOSCHEDULE",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
@@ -164,6 +204,10 @@ const rfidHandler = async (incomingMessage, client) => {
 
         if (leftMinutes <= 0) {
             console.warn(`Daily limit exceeded : ${user.id}`);
+            const notAllowedResponse = {
+                type: "CARSPERR",
+                Error: "DAYLIM",
+            }
             logTerminalEvent(terminal.id, "Server", notAllowedResponse.type, notAllowedResponse);
             return publishResponse(client, terminal.terminalId, notAllowedResponse);
         }
