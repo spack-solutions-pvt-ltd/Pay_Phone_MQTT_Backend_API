@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog, WalletTransaction,
-    UserTimeSlot, 
-    Sequelize} = require("../../models");
+    UserTimeSlot,
+    Sequelize } = require("../../models");
 
 
 
@@ -41,12 +41,11 @@ const getAllUsers = async (req, res, next) => {
         const { count, rows } = await User.findAndCountAll({
             where: whereCondition,
             include: [
-                { model: Wallet, as: "wallet", },
-                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false,  },
-                { model: UserAssociatedNumber, as: "associatedNumbers", required: false,  },
+                { model: Wallet, as: "wallet", required: false, },
+                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
+                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
-            subQuery: false,
-            distinct: true,
+            distinct: false,
             limit,
             offset,
             order: [["id", "DESC"]],
