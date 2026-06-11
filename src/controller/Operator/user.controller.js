@@ -44,7 +44,7 @@ const getAllUsers = async (req, res, next) => {
             ],
             limit,
             offset,
-            // distinct: true,
+            distinct: false,
             subQuery: false,
             order: [["id", "DESC"]],
         });
