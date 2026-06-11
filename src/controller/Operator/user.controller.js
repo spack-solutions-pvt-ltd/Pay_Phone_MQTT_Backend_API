@@ -46,7 +46,7 @@ const getAllUsers = async (req, res, next) => {
                 { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
             distinct: false,
-            subQuery: false,
+            subQuery: true,
             limit,
             offset,
             order: [["id", "DESC"]],
