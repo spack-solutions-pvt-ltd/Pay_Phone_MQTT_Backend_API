@@ -27,8 +27,6 @@ const getAllUsers = async (req, res, next) => {
                 { phone: { [Op.like]: `%${search}%`, }, },
                 // { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
                 // { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
-                Sequelize.literal(`rfidCards.cardNumber LIKE '%${search}%'`),
-                Sequelize.literal(`associatedNumbers.phoneNumber LIKE '%${search}%'`)
             ];
 
         }
@@ -42,8 +40,20 @@ const getAllUsers = async (req, res, next) => {
             where: whereCondition,
             include: [
                 { model: Wallet, as: "wallet", required: false, },
-                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
-                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, limit: 1, },
+                {
+                    model: RFIDCard, as: "rfidCards", where: {
+                        status: "Active",
+                        ...(search && {
+                            cardNumber: { [Op.like]: `%${search}%`, },
+                        }),
+                    }, required: false,
+                },
+                {
+                    model: UserAssociatedNumber, as: "associatedNumbers", required: false,
+                    ...(search && {
+                        where: { phoneNumber: { [Op.like]: `%${search}%`, }, },
+                    }),
+                },
             ],
             distinct: false,
             subQuery: false,
