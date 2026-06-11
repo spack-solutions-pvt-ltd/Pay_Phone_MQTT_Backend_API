@@ -43,7 +43,7 @@ const getAllUsers = async (req, res, next) => {
                 { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
                 { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
-            distinct: true,
+            distinct: false,
             subQuery: !isSearching,
             limit,
             offset,
