@@ -43,10 +43,10 @@ const getAllUsers = async (req, res, next) => {
             include: [
                 { model: Wallet, as: "wallet", required: false, },
                 { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
-                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
+                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, limit: 1, },
             ],
             distinct: false,
-            subQuery: true,
+            subQuery: false,
             limit,
             offset,
             order: [["id", "DESC"]],
