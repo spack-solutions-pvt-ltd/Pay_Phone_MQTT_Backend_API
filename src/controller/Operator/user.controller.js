@@ -9,46 +9,55 @@ const getAllUsers = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
 
-        let { page = 1, limit = 10, search = "", status, } = req.query;
+        let { page = 1, limit = 10, search = "", status } = req.query;
 
         page = Number(page);
-
         limit = Number(limit);
-
         const offset = (page - 1) * limit;
 
-        const whereCondition = { operatorId, };
+        const whereCondition = { operatorId };
         const isSearching = Boolean(search);
-        // search
+
         if (search) {
             whereCondition[Op.or] = [
-                { fullName: { [Op.like]: `%${search}%`, }, },
-                { userId: { [Op.like]: `%${search}%`, }, },
-                { phone: { [Op.like]: `%${search}%`, }, },
+                { fullName: { [Op.like]: `%${search}%` } },
+                { userId: { [Op.like]: `%${search}%` } },
+                { phone: { [Op.like]: `%${search}%` } },
                 { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
                 { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
             ];
-
         }
 
-        // status
         if (status) {
             whereCondition.status = status;
         }
 
-        const { count, rows } = await User.findAndCountAll({
-            where: whereCondition,
-            include: [
-                { model: Wallet, as: "wallet", required: false, },
-                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
-                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
-            ],
-            distinct: false,
-            subQuery: !isSearching,
-            limit,
-            offset,
-            order: [["id", "DESC"]],
-        });
+        // Only include associations in COUNT when searching (needed for WHERE clause)
+        const countInclude = isSearching ? [
+            { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false },
+            { model: UserAssociatedNumber, as: "associatedNumbers", required: false },
+        ] : [];
+
+        const [count, rows] = await Promise.all([
+            // ✅ Plain User.count() — no findAndCountAll, no duplicate id bug
+            User.count({
+                where: whereCondition,
+                include: countInclude,
+                distinct: true,
+            }),
+            User.findAll({
+                where: whereCondition,
+                include: [
+                    { model: Wallet, as: "wallet", required: false },
+                    { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false },
+                    { model: UserAssociatedNumber, as: "associatedNumbers", required: false },
+                ],
+                subQuery: !isSearching,
+                limit,
+                offset,
+                order: [["id", "DESC"]],
+            }),
+        ]);
 
         return res.status(200).json({
             success: true,
