@@ -36,7 +36,7 @@ const getAllUsers = async (req, res, next) => {
         }
 
         // Count query
-        const total = await User.count({
+        const count = await User.count({
             where: whereCondition,
             include: [
                 {
