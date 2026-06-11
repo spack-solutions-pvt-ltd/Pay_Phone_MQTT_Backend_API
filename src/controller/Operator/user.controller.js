@@ -32,14 +32,12 @@ const getAllUsers = async (req, res, next) => {
             whereCondition.status = status;
         }
 
-        // Only include associations in COUNT when searching (needed for WHERE clause)
         const countInclude = isSearching ? [
             { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false },
             { model: UserAssociatedNumber, as: "associatedNumbers", required: false },
         ] : [];
 
         const [count, rows] = await Promise.all([
-            // ✅ Plain User.count() — no findAndCountAll, no duplicate id bug
             User.count({
                 where: whereCondition,
                 include: countInclude,
