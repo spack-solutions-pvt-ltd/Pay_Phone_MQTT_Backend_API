@@ -35,52 +35,17 @@ const getAllUsers = async (req, res, next) => {
             whereCondition.status = status;
         }
 
-        // Count query
-        const count = await User.count({
+        const { count, rows } = await User.findAndCountAll({
             where: whereCondition,
             include: [
-                {
-                    model: RFIDCard,
-                    as: "rfidCards",
-                    where: { status: "Active" },
-                    required: false,
-                    separate: true,
-                },
-                {
-                    model: UserAssociatedNumber,
-                    as: "associatedNumbers",
-                    required: false,
-                    separate: true,
-                },
-            ],
-            distinct: true,
-            col: "id",
-        });
-
-        // Data query
-        const rows = await User.findAll({
-            where: whereCondition,
-            include: [
-                {
-                    model: Wallet,
-                    as: "wallet",
-                },
-                {
-                    model: RFIDCard,
-                    as: "rfidCards",
-                    where: { status: "Active" },
-                    required: false,
-                    separate: true,
-                },
-                {
-                    model: UserAssociatedNumber,
-                    as: "associatedNumbers",
-                    required: false,
-                    separate: true,
-                },
+                { model: Wallet, as: "wallet", },
+                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
+                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
             limit,
             offset,
+            distinct: true,
+            subQuery: false,
             order: [["id", "DESC"]],
         });
 
