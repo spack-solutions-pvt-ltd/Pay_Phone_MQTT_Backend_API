@@ -44,7 +44,6 @@ const getAllUsers = async (req, res, next) => {
                 { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
             distinct: true,
-            col: "id",
             subQuery: !isSearching,
             limit,
             offset,
