@@ -18,7 +18,7 @@ const getAllUsers = async (req, res, next) => {
         const offset = (page - 1) * limit;
 
         const whereCondition = { operatorId, };
-
+        const isSearching = Boolean(search);
         // search
         if (search) {
             whereCondition[Op.or] = [
@@ -45,7 +45,7 @@ const getAllUsers = async (req, res, next) => {
             ],
             distinct: true,
             col: "id",
-            subQuery: false,
+            subQuery: !isSearching,
             limit,
             offset,
             order: [["id", "DESC"]],
