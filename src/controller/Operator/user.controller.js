@@ -25,8 +25,8 @@ const getAllUsers = async (req, res, next) => {
                 { fullName: { [Op.like]: `%${search}%`, }, },
                 { userId: { [Op.like]: `%${search}%`, }, },
                 { phone: { [Op.like]: `%${search}%`, }, },
-                // { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
-                // { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
+                { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
+                { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
             ];
 
         }
@@ -40,22 +40,11 @@ const getAllUsers = async (req, res, next) => {
             where: whereCondition,
             include: [
                 { model: Wallet, as: "wallet", required: false, },
-                {
-                    model: RFIDCard, as: "rfidCards", where: {
-                        status: "Active",
-                        ...(search && {
-                            cardNumber: { [Op.like]: `%${search}%`, },
-                        }),
-                    }, required: false,
-                },
-                {
-                    model: UserAssociatedNumber, as: "associatedNumbers", required: false,
-                    ...(search && {
-                        where: { phoneNumber: { [Op.like]: `%${search}%`, }, },
-                    }),
-                },
+                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, },
+                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, },
             ],
-            distinct: false,
+            distinct: true,
+            col: "id",
             subQuery: false,
             limit,
             offset,
