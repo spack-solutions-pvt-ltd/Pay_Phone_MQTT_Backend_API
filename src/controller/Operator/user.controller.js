@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const { sequelize, User, UserAssociatedNumber, UserActiveDay, Wallet, RFIDCard, CallLog, WalletTransaction,
-    UserTimeSlot } = require("../../models");
+    UserTimeSlot, 
+    Sequelize} = require("../../models");
 
 
 
@@ -24,8 +25,10 @@ const getAllUsers = async (req, res, next) => {
                 { fullName: { [Op.like]: `%${search}%`, }, },
                 { userId: { [Op.like]: `%${search}%`, }, },
                 { phone: { [Op.like]: `%${search}%`, }, },
-                { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
-                { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
+                // { '$rfidCards.cardNumber$': { [Op.like]: `%${search}%` } },
+                // { '$associatedNumbers.phoneNumber$': { [Op.like]: `%${search}%` } },
+                Sequelize.literal(`rfidCards.cardNumber LIKE '%${search}%'`),
+                Sequelize.literal(`associatedNumbers.phoneNumber LIKE '%${search}%'`)
             ];
 
         }
@@ -39,13 +42,12 @@ const getAllUsers = async (req, res, next) => {
             where: whereCondition,
             include: [
                 { model: Wallet, as: "wallet", },
-                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false,subQuery: false, },
-                { model: UserAssociatedNumber, as: "associatedNumbers", required: false,subQuery: false, },
+                { model: RFIDCard, as: "rfidCards", where: { status: "Active" }, required: false, subQuery: false, },
+                { model: UserAssociatedNumber, as: "associatedNumbers", required: false, subQuery: false, },
             ],
+            distinct: true,
             limit,
             offset,
-            distinct: true,
-            // subQuery: false,
             order: [["id", "DESC"]],
         });
 
