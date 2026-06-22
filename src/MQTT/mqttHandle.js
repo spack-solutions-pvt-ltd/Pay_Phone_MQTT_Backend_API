@@ -52,8 +52,10 @@ client.on('message', async function (topic, message, packet, done,) {
             return;
         }
 
-        terminal.lastPingAt = new Date();
-        await terminal.save();
+        await terminal.update({
+            lastPingAt: new Date(),
+            status: "Active"
+        })
 
         logTerminalEvent(terminal.id, "Terminal", incomingMessage.type, incomingMessage);
 
@@ -161,11 +163,11 @@ const checkNotClosedCalls = async () => {
 // Inactive if not come the heartbeat message
 const checkInactiveTerminals = async () => {
     try {
-        const threeMinutesAgo = new Date(Date.now() - 3 * 60 * 1000);
+        const minutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
         const [updatedCount] = await Terminal.update(
             { status: "Offline" },
-            { where: { status: "Active", lastPingAt: { [Op.lt]: threeMinutesAgo } } }
+            { where: { status: "Active", lastPingAt: { [Op.lt]: minutesAgo } } }
         );
 
     } catch (error) {
