@@ -186,21 +186,22 @@ const rfidHandler = async (incomingMessage, client) => {
 
 
         // Today Call Usage
-        const todayUsedSec = await CallLog.sum("duration", {
+        const startOfDay = indiaTime.clone().startOf("day").toDate();
+        const endOfDay = indiaTime.clone().endOf("day").toDate();
+
+        const todayUsed = await CallLog.findOne({
             where: {
                 userId: user.id,
                 createdAt: {
-                    [Op.between]: [
-                        indiaTime.clone().startOf("day").toDate(),
-                        indiaTime.clone().endOf("day").toDate()
-                    ]
+                    [Op.gte]: startOfDay,
+                    [Op.lte]: endOfDay
                 }
-            }
+            },
+            order: [["createdAt", "DESC"]],
+            attributes: ["min_left"]
         });
-        const todayUsedMinutes = Math.ceil(todayUsedSec / 60);
-        const usedMinutes = Number(todayUsedMinutes || 0);
 
-        const leftMinutes = Math.max(Number(user.callDurationLimit) - usedMinutes, 0);
+        const leftMinutes = todayUsed ? Number(todayUsed.min_left) : Number(user.callDurationLimit);
 
         if (leftMinutes <= 0) {
             console.warn(`Daily limit exceeded : ${user.id}`);
