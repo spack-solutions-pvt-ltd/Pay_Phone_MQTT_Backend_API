@@ -53,21 +53,21 @@ const heartbeatHandler = async (incomingMessage, client) => {
             updates.status = "Active";
         }
 
-        if (sim && terminal.simNo !== sim) {
-            console.warn(`SIM number mismatch for terminal ${tid}. Expected: ${terminal.simNo}, Received: ${sim}`);
+        // if (sim && terminal.simNo !== sim) {
+        //     console.warn(`SIM number mismatch for terminal ${tid}. Expected: ${terminal.simNo}, Received: ${sim}`);
 
-            // const request = {
-            //     type: "TCMD",
-            //     tid: terminal.terminalId,
-            //     allowed: false
-            // }
-            // logTerminalEvent(terminal.id, "Server", request.type, request);
-            // return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
-            //     if (err) {
-            //         console.error('Error message:', err);
-            //     }
-            // },);
-        }
+        // const request = {
+        //     type: "TCMD",
+        //     tid: terminal.terminalId,
+        //     allowed: false
+        // }
+        // logTerminalEvent(terminal.id, "Server", request.type, request);
+        // return client.publish(`${terminal.terminalId}`, JSON.stringify(request), (err) => {
+        //     if (err) {
+        //         console.error('Error message:', err);
+        //     }
+        // },);
+        // }
 
         if (imei && terminal.imeiNo !== imei) {
             updates.imeiNo = imei;
