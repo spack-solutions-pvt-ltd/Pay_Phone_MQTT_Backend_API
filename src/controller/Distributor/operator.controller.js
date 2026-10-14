@@ -11,7 +11,8 @@ const createOperator = async (req, res, next) => {
 
         const {
             name, email, phone,
-            companyName, gstNumber, location, per_min_price
+            companyName, gstNumber, location, per_min_price,
+            callHistoryEnabled
         } = req.body;
 
         const existingOperator =
@@ -44,7 +45,8 @@ const createOperator = async (req, res, next) => {
             companyName,
             gstNumber,
             location,
-            per_min_price
+            per_min_price,
+            callHistoryEnabled
         });
 
         await Wallet.create({
@@ -549,6 +551,29 @@ const updateStatus = async (req, res, next) => {
     }
 };
 
+const getAllOperatorsDropdown = async (req, res, next) => {
+    try {
+
+        const distributorId = req.distributor.id;
+
+        const operators = await Operator.findAll({
+            where: {
+                distributorId,
+            },
+            attributes: ["id", "name", "operatorId","distributorId"],
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Operator dropdown list",
+            data: operators,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 
 module.exports = {
     createOperator,
@@ -559,4 +584,5 @@ module.exports = {
     getOperatorWalletTransactions,
     getOperatorDashboardCards,
     updateStatus,
+    getAllOperatorsDropdown
 };

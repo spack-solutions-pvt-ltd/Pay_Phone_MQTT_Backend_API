@@ -55,6 +55,11 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "Active"
     },
     per_min_price: DataTypes.DECIMAL,
+    callHistoryEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+
+    },
   }, {
     sequelize,
     modelName: 'Operator',

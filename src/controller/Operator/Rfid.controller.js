@@ -1,11 +1,11 @@
 const { Op } = require("sequelize");
-const { RFIDCard ,User} = require("../../models");
+const { RFIDCard, User, CallLog } = require("../../models");
 
 const createUserRfid = async (req, res, next) => {
     try {
         const operatorId = req.operator.id;
 
-        const { cardNumber, userId } = req.body;
+        const { cardNumber, userId, note } = req.body;
 
         const existRfid = await RFIDCard.findOne({
             where: { cardNumber, }
@@ -20,7 +20,8 @@ const createUserRfid = async (req, res, next) => {
         const rfidCard = await RFIDCard.create({
             cardNumber: cardNumber,
             userId,
-            operatorId
+            operatorId,
+            note
         });
 
         return res.status(201).json({
@@ -43,12 +44,25 @@ const updateRfidById = async (req, res, next) => {
                 message: "RFID card not found",
             });
         }
+        const callLog = await CallLog.findOne({
+            where: {
+                cid: rfidCard.cardNumber,
+            },
+            attributes: ["id"],
+        });
+
+        if (callLog) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot update RFID card because call logs exist",
+            });
+        }
 
         await rfidCard.update(req.body);
 
         return res.status(200).json({
             success: true,
-            message: "RFID card deleted successfully",
+            message: "RFID card update successfully",
             data: rfidCard,
         });
     } catch (error) {
@@ -131,9 +145,50 @@ const getAllRfids = async (req, res, next) => {
     }
 };
 
+const deleteRfidById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const rfidCard = await RFIDCard.findByPk(id);
+
+        if (!rfidCard) {
+            return res.status(404).json({
+                success: false,
+                message: "RFID card not found",
+            });
+        }
+        const callLog = await CallLog.findOne({
+            where: {
+                cid: rfidCard.cardNumber,
+            },
+            attributes: ["id"],
+        });
+
+        if (callLog) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot delete RFID card because call logs exist",
+            });
+        }
+
+        // Delete if no call log exists
+        await rfidCard.destroy();
+
+        return res.status(200).json({
+            success: true,
+            message: "RFID card deleted successfully",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 module.exports = {
     createUserRfid,
     updateRfidById,
     getRfidById,
-    getAllRfids
+    getAllRfids,
+    deleteRfidById
 }

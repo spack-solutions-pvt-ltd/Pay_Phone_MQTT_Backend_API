@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { sequelize, User, Wallet, WalletTransaction, } = require("../../models");
+const { sequelize, User, Wallet, WalletTransaction, RFIDCard } = require("../../models");
 
 const rechargeUserWallet = async (req, res, next) => {
 
@@ -225,10 +225,29 @@ const walletTranactions = async (req, res, next) => {
 
         // search
         if (search) {
+
+            const matchingCards = await RFIDCard.findAll({
+                where: {
+                    cardNumber: {
+                        [Op.like]: `%${search}%`,
+                    },
+                    operatorId,
+                },
+                attributes: ["userId"],
+                raw: true,
+            });
+
+            const rfidUserIds = [
+                ...new Set(matchingCards.map((card) => card.userId)),
+            ];
             whereCondition[Op.or] = [
                 { transactionId: { [Op.like]: `%${search}%`, }, },
                 { '$user.userId$': { [Op.like]: `%${search}%` } },
                 { '$user.fullName$': { [Op.like]: `%${search}%` } },
+                { '$user.phone$': { [Op.like]: `%${search}%` } },
+                ...(rfidUserIds.length
+                    ? [{ userId: { [Op.in]: rfidUserIds } }]
+                    : []),
             ];
         }
 
@@ -242,6 +261,13 @@ const walletTranactions = async (req, res, next) => {
             include: [
                 {
                     model: User, as: "user", attributes: ["id", "userId", "fullName", "phone",],
+                    include: [
+                        {
+                            model: RFIDCard,
+                            as: "rfidCards",
+                            attributes: ["id", "cardNumber"],
+                        },
+                    ],
                 },
             ],
             limit,

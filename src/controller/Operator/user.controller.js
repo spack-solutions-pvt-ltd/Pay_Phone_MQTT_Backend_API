@@ -132,7 +132,7 @@ const createUser = async (req, res, next) => {
         const existingUser = await User.findOne({
             where: {
                 [Op.or]: [
-                    { phone: phone },
+                    // { phone: phone },
                     { fullName: fullName },
                 ],
             },

@@ -1,5 +1,5 @@
 const express = require("express");
-const { createUserRfid, updateRfidById, getRfidById, getAllRfids } = require("../../controller/Operator/Rfid.controller");
+const { createUserRfid, updateRfidById, getRfidById, getAllRfids, checkRFIDCardDelete, deleteRfidById } = require("../../controller/Operator/Rfid.controller");
 const { createRfidValidation, updateRfidValidation } = require("../../validation/operator/rfidValidation");
 const router = express.Router();
 
@@ -7,7 +7,7 @@ router.get("/", getAllRfids);
 router.get("/:id", getRfidById);
 router.post("/", createRfidValidation, createUserRfid);
 router.put("/:id", updateRfidValidation, updateRfidById);
-
+router.delete('/:id', deleteRfidById);
 
 /**
  * @swagger

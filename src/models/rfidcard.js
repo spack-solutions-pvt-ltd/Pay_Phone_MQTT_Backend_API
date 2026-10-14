@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "Active",
     },
     operatorId: DataTypes.BIGINT,
+    note:DataTypes.STRING
   }, {
     sequelize,
     modelName: 'RFIDCard',

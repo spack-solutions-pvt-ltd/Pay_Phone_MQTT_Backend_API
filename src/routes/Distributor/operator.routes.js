@@ -1,7 +1,7 @@
 
 const express = require("express");
 const { createOperatorValidation, updateOperatorValidation, rechargeOperatorWalletValidation } = require("../../validation/distributor/operatorValidation");
-const { createOperator, getAllOperators, getOperatorById, updateOperator, reachargeOperatorWallet, getOperatorWalletTransactions, getOperatorDashboardCards, updateStatus } = require("../../controller/Distributor/operator.controller");
+const { createOperator, getAllOperators, getOperatorById, updateOperator, reachargeOperatorWallet, getOperatorWalletTransactions, getOperatorDashboardCards, updateStatus, getAllOperatorsDropdown } = require("../../controller/Distributor/operator.controller");
 const router = express.Router();
 
 
@@ -13,6 +13,7 @@ router.patch("/status/:id", updateStatus);
 router.post("/wallet-recharge", rechargeOperatorWalletValidation, reachargeOperatorWallet);
 router.get("/wallet-transactions/:operatorId", getOperatorWalletTransactions);
 router.get("/dashboard-cards/:operatorId", getOperatorDashboardCards);
+router.get("/dropdown/data", getAllOperatorsDropdown);
 
 /**
  * @swagger
