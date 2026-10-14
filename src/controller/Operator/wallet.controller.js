@@ -273,6 +273,8 @@ const walletTranactions = async (req, res, next) => {
             limit,
             offset,
             order: [["createdAt", "DESC"]],
+            subQuery: false,
+            distinct: true,
         });
 
         return res.status(200).json({
